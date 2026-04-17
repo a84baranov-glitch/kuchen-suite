@@ -1592,6 +1592,64 @@
   }
   .filter-chip:active { opacity: 0.7; transform: scale(0.95); }
 
+  /* ── N2: ALLERGEN-BAR ── */
+  .allergen-bar {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .allergen-bar::-webkit-scrollbar { display: none; }
+  .allergen-chip {
+    white-space: nowrap;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: rgba(196,113,42,0.1);
+    border: 1px solid rgba(196,113,42,0.2);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .allergen-chip.active {
+    background: var(--warm);
+    color: white;
+    border-color: var(--warm);
+  }
+
+  /* ── N2: ALLERGEN-DISPLAY (Detail-Screen) ── */
+  .allergen-display { padding: 0 20px 12px; }
+  .allergen-display-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .allergen-badges-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .allergen-badge { font-size: 12px; padding: 4px 10px; border-radius: 12px; background: #FFF3E0; color: var(--warm); border: 1px solid rgba(196,113,42,0.2); font-weight: 500; }
+  .allergen-badge.none { background: #E8F5E9; color: #388E3C; border-color: rgba(56,142,60,0.2); }
+
+  /* ── N1: STARTER-HEALTH ── */
+  .starter-health-score { display:flex; align-items:center; gap:12px; background:var(--surface); border-radius:16px; padding:14px 16px; }
+  .sh-emoji { font-size:28px; }
+  .sh-info { flex:1; }
+  .sh-label { font-size:14px; font-weight:600; color:var(--dark); margin-bottom:6px; }
+  .sh-bar-wrap { height:6px; background:rgba(0,0,0,0.08); border-radius:3px; overflow:hidden; }
+  .sh-bar { height:100%; background:var(--warm); border-radius:3px; transition:width 0.5s ease; }
+  .sh-ready { font-size:12px; font-weight:600; color:#388E3C; background:#E8F5E9; padding:4px 10px; border-radius:10px; }
+  .sh-notready { font-size:12px; color:var(--muted); }
+
+  /* ── N7: FAMILIEN-ROLLEN ── */
+  .step-role-section { padding: 0 20px 12px; }
+  .step-role-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .step-role-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .step-role-btn { border: 1.5px solid rgba(0,0,0,0.15); border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 500; cursor: pointer; background: white; color: var(--dark); transition: all 0.15s; min-height: 44px; font-family: system-ui, -apple-system, sans-serif; }
+  .step-role-btn:active { transform: scale(0.95); }
+  .step-role-btn.active { font-weight: 700; }
+  .step-role-clear { border-color: rgba(0,0,0,0.1); color: var(--muted); padding: 8px 12px; }
+
   /* ── F-21: BACKHISTORIE ── */
   .history-overlay {
     position: fixed;
@@ -3065,6 +3123,15 @@
     <div class="filter-chip" onclick="setFilter('sauerteig', this)">Sauerteig</div>
     <div class="filter-chip" onclick="setFilter('schnell', this)">Schnell (&lt;3h)</div>
     <div class="filter-chip" onclick="setFilter('vollkorn', this)">Vollkorn</div>
+    <div class="filter-chip" onclick="setFilter('regional', this)">📍 Regional</div>
+  </div>
+  <!-- N2: Allergen-Filter-Bar -->
+  <div class="allergen-bar" id="allergenBar">
+    <div class="allergen-chip" onclick="setAllergenFilter('glutenfrei', this)">🌾 Glutenfrei</div>
+    <div class="allergen-chip" onclick="setAllergenFilter('laktosefrei', this)">🥛 Laktosefrei</div>
+    <div class="allergen-chip" onclick="setAllergenFilter('nussfrei', this)">🥜 Nussfrei</div>
+    <div class="allergen-chip" onclick="setAllergenFilter('eifrei', this)">🥚 Eifrei</div>
+    <div class="allergen-chip" onclick="setAllergenFilter('sesamfrei', this)">🫘 Sesamfrei</div>
   </div>
   <div class="recipes-section">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
@@ -3123,6 +3190,12 @@
       <button class="scale-btn" onclick="changeScale(1)">+</button>
     </div>
     <div style="font-size:11px;color:var(--muted);margin-top:6px;">Brote (1–99 möglich)</div>
+  </div>
+
+  <!-- N2: Allergen-Anzeige -->
+  <div class="allergen-display">
+    <div class="allergen-display-label">Allergene</div>
+    <div id="allergenBadges" class="allergen-badges-row"></div>
   </div>
 
   <div class="ingredients-section">
@@ -3240,6 +3313,11 @@
       <div id="stepNotesArea" style="display:none">
         <textarea class="step-notes-area" id="stepNotesInput" placeholder="z.B. Teig war heute weicher als sonst…" autocomplete="off" oninput="saveStepNote()"></textarea>
       </div>
+    </div>
+    <!-- N7: Familien-Aufgabenverteilung -->
+    <div class="step-role-section">
+      <div class="step-role-label">👨‍👩‍👦 Wer macht das?</div>
+      <div id="stepRoleArea"></div>
     </div>
     <div id="stepIngredients" class="step-ingredients" style="display:none"></div>
     <div id="timerBox" class="timer-box" style="display:none">
@@ -3455,6 +3533,8 @@
       <textarea id="sdNote" placeholder="Temperatur, Mehlsorte, Auffälligkeiten…" autocomplete="off"></textarea>
       <button class="sd-btn" onclick="addStarterEntry()">📝 Eintrag speichern</button>
     </div>
+    <!-- N1: Starter-Gesundheitsscore -->
+    <div id="starterHealth" style="padding:0 20px 16px;"></div>
     <div id="sdEntries"></div>
     <div class="sd-empty" id="sdEmpty">
       <div class="sd-empty-title">Noch kein Eintrag</div>
@@ -4906,6 +4986,132 @@ const RECIPES = [
       },
     ],
   },
+  // ── N5: REGIONALBROTE ──
+  {
+    id: 'schwarzwaelder',
+    name: 'Schwarzwälder Brot',
+    tag: 'Regional · Baden-Württemberg',
+    emoji: '🌲',
+    totalTime: '18 Std',
+    activeTime: '~40 Min',
+    ingredients: [
+      { name: 'Roggenschrot', amount: 200, unit: 'g' },
+      { name: 'Weizenmehl Type 1050', amount: 300, unit: 'g' },
+      { name: 'Wasser', amount: 380, unit: 'ml' },
+      { name: 'Sauerteig-Starter', amount: 100, unit: 'g' },
+      { name: 'Salz', amount: 10, unit: 'g' },
+      { name: 'Brotgewürz (Kümmel, Koriander, Fenchel)', amount: 5, unit: 'g' },
+    ],
+    steps: [
+      { title: 'Vorteig', content: 'Sauerteig-Starter mit 150 ml warmem Wasser und 100 g Roggenschrot verrühren. Abdecken und 8–12 Stunden bei Raumtemperatur fermentieren lassen.', timer: null, ingredientIdxs: [0, 2, 3] },
+      { title: 'Teig kneten', content: 'Vorteig mit Weizenmehl, restlichem Wasser, Salz und Brotgewürz vermischen. 10 Minuten kräftig kneten bis ein glatter, leicht klebriger Teig entsteht.', timer: 600, ingredientIdxs: [1, 4, 5] },
+      { title: 'Stockgare', content: 'Teig in geölter Schüssel zugedeckt 3–4 Stunden bei Raumtemperatur gehen lassen. Er sollte sich deutlich vergrößern.', timer: 10800, ingredientIdxs: [] },
+      { title: 'Formen', content: 'Teig auf bemehlter Fläche kurz falten und zu einem länglichen Laib formen. In ein bemehltes Gärkörbchen legen, mit Schrot bestreuen.', timer: null, ingredientIdxs: [] },
+      { title: 'Stückgare', content: '1–2 Stunden bei Raumtemperatur gehen lassen bis der Teigling deutlich aufgegangen ist.', timer: 5400, ingredientIdxs: [] },
+      { title: 'Backen', content: 'Ofen auf 250°C vorheizen, Backblech oder Gusseisen mitaufheizen. Brot einschneiden, in den heißen Ofen geben. 10 Min bei 250°C, dann auf 200°C reduzieren und 35 Min fertig backen.', timer: 2700, ingredientIdxs: [] },
+      { title: 'Auskühlen', content: 'Mindestens 2 Stunden auf einem Gitter auskühlen lassen. Das Schwarzwälder Brot schmeckt am besten am nächsten Tag.', timer: null, ingredientIdxs: [] },
+    ],
+  },
+  {
+    id: 'frankenlaib',
+    name: 'Frankenlaib',
+    tag: 'Regional · Bayern/Franken',
+    emoji: '🏰',
+    totalTime: '4 Std',
+    activeTime: '~30 Min',
+    ingredients: [
+      { name: 'Weizenmehl Type 812', amount: 400, unit: 'g' },
+      { name: 'Roggenmehl Type 997', amount: 100, unit: 'g' },
+      { name: 'Wasser', amount: 310, unit: 'ml' },
+      { name: 'Hefe (frisch)', amount: 15, unit: 'g' },
+      { name: 'Salz', amount: 10, unit: 'g' },
+      { name: 'Malzmehl (hell)', amount: 10, unit: 'g' },
+    ],
+    steps: [
+      { title: 'Hefe auflösen', content: 'Hefe in 100 ml lauwarmem Wasser auflösen, 5 Minuten stehen lassen bis sie schäumt.', timer: 300, ingredientIdxs: [2, 3] },
+      { title: 'Teig kneten', content: 'Alle Mehle, restliches Wasser, Salz und Malzmehl mit der Hefemischung 8–10 Minuten kneten. Der Teig soll sich von der Schüssel lösen.', timer: 540, ingredientIdxs: [0, 1, 4, 5] },
+      { title: 'Stockgare', content: 'Abgedeckt 1,5 Stunden gehen lassen bis sich der Teig verdoppelt hat.', timer: 5400, ingredientIdxs: [] },
+      { title: 'Formen & Einschneiden', content: 'Rund formen, auf bemehltes Backpapier setzen. Mit einem Messer ein tiefes Kreuz einschneiden — typisch fränkisch.', timer: null, ingredientIdxs: [] },
+      { title: 'Stückgare', content: '45 Minuten abgedeckt gehen lassen.', timer: 2700, ingredientIdxs: [] },
+      { title: 'Backen', content: '220°C, Dampf in den ersten 10 Min (Schüssel mit heißem Wasser auf den Boden). Insgesamt 40 Min backen bis die Kruste dunkel und die Innentemperatur 96°C ist.', timer: 2400, ingredientIdxs: [] },
+    ],
+  },
+  {
+    id: 'berliner-landbrot',
+    name: 'Berliner Landbrot',
+    tag: 'Regional · Berlin',
+    emoji: '🏛️',
+    totalTime: '20 Std',
+    activeTime: '~35 Min',
+    ingredients: [
+      { name: 'Roggenmehl Type 1150', amount: 350, unit: 'g' },
+      { name: 'Weizenmehl Type 1050', amount: 150, unit: 'g' },
+      { name: 'Wasser', amount: 390, unit: 'ml' },
+      { name: 'Sauerteig-Starter', amount: 80, unit: 'g' },
+      { name: 'Salz', amount: 11, unit: 'g' },
+      { name: 'Sonnenblumenkerne', amount: 50, unit: 'g' },
+    ],
+    steps: [
+      { title: 'Vorteig', content: '80 g Starter mit 200 ml Wasser und 150 g Roggenmehl zu einem weichen Brei rühren. 12–14 Stunden bei Raumtemperatur gären lassen.', timer: null, ingredientIdxs: [0, 2, 3] },
+      { title: 'Quellen', content: 'Sonnenblumenkerne in 50 ml Wasser einweichen (mind. 1 Stunde).', timer: 3600, ingredientIdxs: [5] },
+      { title: 'Hauptteig', content: 'Vorteig mit Weizenmehl, restlichem Roggenmehl, restlichem Wasser, Salz und gequollenen Kernen 5 Minuten kräftig rühren (Teig ist sehr weich).', timer: 300, ingredientIdxs: [1, 4] },
+      { title: 'Stockgare', content: '2–3 Stunden abgedeckt gehen lassen.', timer: 9000, ingredientIdxs: [] },
+      { title: 'In Form füllen', content: 'Kastenform (25 cm) einfetten und mit Sonnenblumenkernen ausstreuen. Teig einfüllen und glattstreichen.', timer: null, ingredientIdxs: [] },
+      { title: 'Stückgare', content: '1 Stunde bei Raumtemperatur aufgehen lassen.', timer: 3600, ingredientIdxs: [] },
+      { title: 'Backen', content: '230°C, 10 Min mit Dampf, dann 55 Min bei 200°C. Kerntemperatur: 98°C. 15 Min in der Form ruhen lassen, dann stürzen.', timer: 3900, ingredientIdxs: [] },
+    ],
+  },
+  {
+    id: 'tiroler-bauernbrot',
+    name: 'Tiroler Bauernbrot',
+    tag: 'Regional · Österreich',
+    emoji: '⛰️',
+    totalTime: '5 Std',
+    activeTime: '~40 Min',
+    ingredients: [
+      { name: 'Roggenvollkornmehl', amount: 300, unit: 'g' },
+      { name: 'Weizenmehl Type 700', amount: 200, unit: 'g' },
+      { name: 'Wasser', amount: 330, unit: 'ml' },
+      { name: 'Sauerteig-Starter', amount: 120, unit: 'g' },
+      { name: 'Hefe (frisch)', amount: 8, unit: 'g' },
+      { name: 'Salz', amount: 11, unit: 'g' },
+      { name: 'Kümmel (ganz)', amount: 5, unit: 'g' },
+      { name: 'Butterschmalz', amount: 20, unit: 'g' },
+    ],
+    steps: [
+      { title: 'Teig ansetzen', content: 'Starter mit Hefe, Wasser und Butterschmalz verrühren. Mehle, Salz und Kümmel dazugeben und 10 Minuten kräftig kneten.', timer: 600, ingredientIdxs: [0, 1, 2, 3, 4, 5, 6, 7] },
+      { title: 'Stockgare', content: '2 Stunden abgedeckt bei 24°C gehen lassen.', timer: 7200, ingredientIdxs: [] },
+      { title: 'Formen', content: 'Rund wirken, Oberfläche mit Mehl bestäuben. Tief einschneiden (Rautenmuster — typisch tirolisch).', timer: null, ingredientIdxs: [] },
+      { title: 'Stückgare', content: '1 Stunde im Gärkörbchen oder abgedeckt gehen lassen.', timer: 3600, ingredientIdxs: [] },
+      { title: 'Backen', content: '240°C mit Dampf, 15 Min. Dann auf 200°C, weitere 35 Min. Ergibt ein kräftiges, aromatisches Brot.', timer: 3000, ingredientIdxs: [] },
+      { title: 'Auskühlen', content: 'Auf einem Holzbrett oder Gitter mindestens 2 Stunden auskühlen. Mit Tiroler Speck und Butter servieren.', timer: null, ingredientIdxs: [] },
+    ],
+  },
+  {
+    id: 'allgaeuer-milchbrot',
+    name: 'Allgäuer Milchbrot',
+    tag: 'Regional · Bayern',
+    emoji: '🧈',
+    totalTime: '3 Std',
+    activeTime: '~25 Min',
+    ingredients: [
+      { name: 'Weizenmehl Type 550', amount: 500, unit: 'g' },
+      { name: 'Vollmilch (warm)', amount: 280, unit: 'ml' },
+      { name: 'Butter (weich)', amount: 50, unit: 'g' },
+      { name: 'Hefe (frisch)', amount: 20, unit: 'g' },
+      { name: 'Zucker', amount: 20, unit: 'g' },
+      { name: 'Salz', amount: 9, unit: 'g' },
+      { name: 'Ei (zum Bestreichen)', amount: 1, unit: 'Stk' },
+    ],
+    steps: [
+      { title: 'Hefemilch', content: 'Hefe mit Zucker in der warmen Milch auflösen. 10 Minuten stehen lassen.', timer: 600, ingredientIdxs: [1, 3, 4] },
+      { title: 'Teig kneten', content: 'Mehl, Salz und Hefemilch 5 Min vermischen, dann Butter stückweise einarbeiten und weitere 8 Min kneten bis der Teig seidig-glatt ist.', timer: 780, ingredientIdxs: [0, 2, 5] },
+      { title: 'Stockgare', content: '1,5 Stunden bei Raumtemperatur gehen lassen bis der Teig sich verdoppelt hat.', timer: 5400, ingredientIdxs: [] },
+      { title: 'Formen', content: 'Teig teilen, zu Kugeln formen und in eine Kastenform oder auf ein Blech setzen. Mit Ei bestreichen.', timer: null, ingredientIdxs: [6] },
+      { title: 'Stückgare', content: '30 Minuten gehen lassen.', timer: 1800, ingredientIdxs: [] },
+      { title: 'Backen', content: '180°C, 30–35 Minuten bis das Brot goldbraun ist. Vor dem Backen nochmals mit Ei bestreichen.', timer: 2100, ingredientIdxs: [] },
+    ],
+  },
 ];
 
 // ═══════════════════════════════════════════════════════
@@ -4919,6 +5125,7 @@ let timerSeconds = 0;
 let timerRunning = false;
 let timerOriginal = 0;
 let confirmAction = null;
+let stepRoles = {}; // N7: { stepIndex: 'papa'|'mama'|'kind'|null }
 let notificationPermission = false;
 let wakeLockRef = null;
 
@@ -5382,6 +5589,7 @@ function openRecipe(id) {
   document.getElementById('d-steps').textContent = currentRecipe.steps.length;
   updateScaleDisplay();
   renderIngredients();
+  renderAllergenBadges();
   loadNotes();
   document.getElementById('notesArea').style.display = 'none';
   // Reset substitution and nutritional value panels when switching recipes
@@ -5421,6 +5629,19 @@ function renderIngredients() {
   }).join('');
 }
 
+// N2: Allergen-Badges auf Detail-Screen rendern
+function renderAllergenBadges() {
+  const el = document.getElementById('allergenBadges');
+  if (!el) return;
+  const allergens = RECIPE_ALLERGENS[currentRecipe.id] || [];
+  const labels = { gluten: '🌾 Gluten', laktose: '🥛 Laktose', nuesse: '🥜 Nüsse', ei: '🥚 Ei', sesam: '🫘 Sesam' };
+  if (allergens.length === 0) {
+    el.innerHTML = '<span class="allergen-badge none">✓ Keine Hauptallergene</span>';
+  } else {
+    el.innerHTML = allergens.map(a => `<span class="allergen-badge">${labels[a] || esc(a)}</span>`).join('');
+  }
+}
+
 // ═══════════════════════════════════════════════════════
 // COOKING
 // ═══════════════════════════════════════════════════════
@@ -5448,6 +5669,8 @@ function startCooking() {
 function _doStartCooking() {
   currentStep = 0;
   stopTimer();
+  // N7: Rollen laden
+  try { stepRoles = JSON.parse(localStorage.getItem('brot-roles-' + currentRecipe.id) || '{}'); } catch(e) { stepRoles = {}; }
   document.getElementById('c-recipe-name').textContent = currentRecipe.name;
   buildOverview();
   renderStep();
@@ -5557,12 +5780,45 @@ function renderStep() {
   }
   // F-17: Schritt-Notizen laden
   loadStepNote();
+  // N7: Rolle laden und anzeigen
+  renderStepRole();
 
   // nav buttons
   document.getElementById('prevBtn').style.display = currentStep === 0 ? 'none' : 'flex';
   document.getElementById('nextBtn').textContent = currentStep === total - 1 ? 'Fertig 🎉' : 'Weiter →';
 
   updateOverview();
+}
+
+// N7: Familien-Aufgabenverteilung
+function renderStepRole() {
+  const el = document.getElementById('stepRoleArea');
+  if (!el) return;
+  const role = stepRoles[currentStep] || null;
+  const roles = [
+    { id: 'papa', label: '👨 Papa', color: '#1565C0' },
+    { id: 'mama', label: '👩 Mama', color: '#AD1457' },
+    { id: 'kind', label: '👦 Kind', color: '#E65100' },
+  ];
+  el.innerHTML = `
+    <div class="step-role-row">
+      ${roles.map(r => `
+        <button class="step-role-btn ${role === r.id ? 'active' : ''}"
+          style="${role === r.id ? 'background:'+r.color+';color:white;border-color:'+r.color : ''}"
+          onclick="setStepRole('${r.id}')">${r.label}</button>
+      `).join('')}
+      ${role ? '<button class="step-role-btn step-role-clear" onclick="setStepRole(null)">✕</button>' : ''}
+    </div>`;
+}
+
+function setStepRole(role) {
+  if (role === null) {
+    delete stepRoles[currentStep];
+  } else {
+    stepRoles[currentStep] = role;
+  }
+  renderStepRole();
+  try { localStorage.setItem('brot-roles-' + currentRecipe.id, JSON.stringify(stepRoles)); } catch(e) {}
 }
 
 let _navDebounce = false;
@@ -6051,9 +6307,46 @@ const RECIPE_TAGS = {
   nussbrot:        ['sauerteig'],
   roggenmischbrot: ['sauerteig', 'vollkorn'],
   pumpernickel:    ['sauerteig', 'vollkorn'],
+  // N5: Regionalbrote
+  schwarzwaelder:    ['sauerteig', 'regional'],
+  frankenlaib:       ['hefe', 'regional'],
+  'berliner-landbrot': ['sauerteig', 'vollkorn', 'regional'],
+  'tiroler-bauernbrot': ['sauerteig', 'regional'],
+  'allgaeuer-milchbrot': ['hefe', 'regional'],
+};
+
+// N2: RECIPE_ALLERGENS
+const RECIPE_ALLERGENS = {
+  starter:         ['gluten'],
+  sauerteig:       ['gluten'],
+  bauernbrot:      ['gluten'],
+  baguette:        ['gluten'],
+  ciabatta:        ['gluten'],
+  dinkelbrot:      ['gluten'],
+  focaccia:        ['gluten'],
+  vollkornbrot:    ['gluten'],
+  zopfbrot:        ['gluten', 'laktose', 'ei'],
+  brioche:         ['gluten', 'laktose', 'ei'],
+  brezel:          ['gluten'],
+  roggenbroetchen: ['gluten'],
+  joghurtbrot:     ['gluten', 'laktose'],
+  koernerbrot:     ['gluten', 'sesam'],
+  weissbrot:       ['gluten'],
+  sesambroetchen:  ['gluten', 'sesam'],
+  kurbiskernbrot:  ['gluten'],
+  karottenbrot:    ['gluten'],
+  nussbrot:        ['gluten', 'nuesse'],
+  roggenmischbrot: ['gluten'],
+  pumpernickel:    ['gluten'],
+  schwarzwaelder:    ['gluten'],
+  frankenlaib:       ['gluten'],
+  'berliner-landbrot': ['gluten'],
+  'tiroler-bauernbrot': ['gluten', 'laktose'],
+  'allgaeuer-milchbrot': ['gluten', 'laktose', 'ei'],
 };
 
 let activeFilter = 'all';
+let activeAllergenFilter = null; // z.B. 'glutenfrei', 'laktosefrei', etc.
 
 function setFilter(filter, el) {
   activeFilter = filter;
@@ -6062,11 +6355,42 @@ function setFilter(filter, el) {
   renderHome();
 }
 
+function setAllergenFilter(filter, el) {
+  if (activeAllergenFilter === filter) {
+    activeAllergenFilter = null;
+    document.querySelectorAll('.allergen-chip').forEach(c => c.classList.remove('active'));
+  } else {
+    activeAllergenFilter = filter;
+    document.querySelectorAll('.allergen-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+  renderHome();
+}
+
 function recipeMatchesFilter(recipe) {
-  if (activeFilter === 'all') return true;
-  const tags = RECIPE_TAGS[recipe.id] || [];
-  if (activeFilter === 'schnell') return tags.includes('schnell');
-  return tags.includes(activeFilter);
+  // Kategorie-Filter
+  if (activeFilter !== 'all') {
+    const tags = RECIPE_TAGS[recipe.id] || [];
+    if (activeFilter === 'regional') {
+      if (!tags.includes('regional')) return false;
+    } else {
+      if (!tags.includes(activeFilter)) return false;
+    }
+  }
+  // Allergen-Filter
+  if (activeAllergenFilter) {
+    const allergens = RECIPE_ALLERGENS[recipe.id] || [];
+    const filterMap = {
+      'glutenfrei': 'gluten',
+      'laktosefrei': 'laktose',
+      'nussfrei': 'nuesse',
+      'eifrei': 'ei',
+      'sesamfrei': 'sesam',
+    };
+    const avoid = filterMap[activeAllergenFilter];
+    if (avoid && allergens.includes(avoid)) return false;
+  }
+  return true;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -6897,11 +7221,53 @@ function deleteStarterEntry(ts) {
   showToast('Eintrag gelöscht');
 }
 
+// N1: Sauerteig-Gesundheitsscore berechnen
+function calcStarterHealth(entries) {
+  if (entries.length === 0) return null;
+  const recent = entries.slice(-7); // letzte 7 Einträge
+  let score = 0;
+  let max = 0;
+  recent.forEach(e => {
+    max += 3;
+    const act = e.activity;
+    if (act === 'sehr-hoch') score += 3;
+    else if (act === 'hoch') score += 2.5;
+    else if (act === 'mittel') score += 1.5;
+    else score += 0.5;
+  });
+  const pct = max > 0 ? Math.round((score / max) * 100) : 0;
+  let label, emoji;
+  if (pct >= 80) { label = 'Sehr aktiv'; emoji = '🔥'; }
+  else if (pct >= 55) { label = 'Gut'; emoji = '✅'; }
+  else if (pct >= 30) { label = 'Schwach'; emoji = '⚠️'; }
+  else { label = 'Braucht Pflege'; emoji = '😴'; }
+  const lastEntry = recent[recent.length - 1];
+  const readyToBake = lastEntry && (lastEntry.activity === 'hoch' || lastEntry.activity === 'sehr-hoch');
+  return { pct, label, emoji, readyToBake };
+}
+
 function renderStarterDiary() {
   const entries = getStarterEntries();
   const el = document.getElementById('sdEntries');
   const empty = document.getElementById('sdEmpty');
   const chartWrap = document.getElementById('sdChartWrap');
+
+  // N1: Gesundheitsscore
+  const health = calcStarterHealth(entries);
+  const healthEl = document.getElementById('starterHealth');
+  if (healthEl && health) {
+    healthEl.innerHTML = `
+      <div class="starter-health-score">
+        <div class="sh-emoji">${health.emoji}</div>
+        <div class="sh-info">
+          <div class="sh-label">${health.label}</div>
+          <div class="sh-bar-wrap"><div class="sh-bar" style="width:${health.pct}%"></div></div>
+        </div>
+        ${health.readyToBake ? '<div class="sh-ready">✓ Backbereit!</div>' : '<div class="sh-notready">Noch nicht backbereit</div>'}
+      </div>`;
+  } else if (healthEl) {
+    healthEl.innerHTML = '';
+  }
 
   if (entries.length === 0) {
     el.innerHTML = '';
