@@ -21,7 +21,7 @@
     --warm: #C4712A;
     --warm-light: #E8956A;
     --gold: #D4A847;
-    --muted: #8B7355;
+    --muted: #6B5538;  /* P1.8: Kontrast 4.7:1 auf --cream (WCAG AA) */
     --surface: #FDF6E8;
     --step-bg: #FFFBF0;
     /* Kaffee-spezifisch */
@@ -38,6 +38,25 @@
     transition: background 0.3s ease;
   }
   body[data-world="kaffee"] { background: var(--k-bg); }
+
+  /* P1.9: Accessibility — Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* P1.9: Accessibility — High Contrast Mode */
+  @media (prefers-contrast: more) {
+    :root {
+      --muted: #2D2010;
+      --warm: #8B4513;
+      --gold: #8B6F17;
+    }
+  }
 
   /* ══════════════════════════════════════════
      SUITE — Tab-Bar & World-Container
@@ -156,6 +175,78 @@
     transform: rotate(-15deg);
   }
 
+  /* ── ONBOARDING MODAL ── */
+  #onboarding-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  #onboarding-modal.active {
+    display: flex;
+    opacity: 1;
+  }
+  .onboard-card {
+    background: #1E120A;
+    border: 1px solid rgba(212,168,71,0.3);
+    border-radius: 24px;
+    padding: 40px 30px;
+    max-width: 360px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .onboard-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+  }
+  .onboard-title {
+    font-family: Georgia, serif;
+    font-size: 26px;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+  .onboard-text {
+    font-size: 15px;
+    color: var(--cream);
+    line-height: 1.6;
+    margin-bottom: 30px;
+  }
+  .onboard-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 30px;
+  }
+  .onboard-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: background 0.3s;
+  }
+  .onboard-dot.active { background: var(--warm); }
+  .onboard-btn {
+    background: var(--warm);
+    color: #fff;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(196,113,42,0.3);
+  }
+
+
   .app-logo {
     font-family: Georgia, 'Times New Roman', serif;
     font-size: 13px;
@@ -228,24 +319,51 @@
   }
 
   .recipe-card {
-    background: linear-gradient(135deg, #2A1A08, #1E120A);
+    background: #1E120A;
     border: 1px solid rgba(212,168,71,0.2);
     border-radius: 20px;
-    padding: 24px;
     margin-bottom: 16px;
     cursor: pointer;
     transition: transform 0.2s, border-color 0.2s;
     position: relative;
     overflow: hidden;
+    min-height: 130px;
+    display: flex;
   }
 
   .recipe-card:active { transform: scale(0.97); }
 
-  /* emoji ::after ersetzt durch SVG-Illustrationen */
+  .recipe-card-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .recipe-card-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+  }
+  .recipe-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(30,18,10,0.95) 0%, rgba(30,18,10,0.8) 40%, rgba(30,18,10,0.1) 100%);
+    z-index: 1;
+  }
+  .recipe-card-content {
+    position: relative;
+    z-index: 2;
+    padding: 24px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
 
   .recipe-tag {
     display: inline-block;
-    background: rgba(196,113,42,0.2);
+    align-self: flex-start;
+    background: rgba(196,113,42,0.3);
     color: var(--warm-light);
     font-size: 10px;
     letter-spacing: 2px;
@@ -253,6 +371,7 @@
     padding: 3px 10px;
     border-radius: 20px;
     margin-bottom: 10px;
+    backdrop-filter: blur(4px);
   }
 
   .recipe-name {
@@ -260,28 +379,21 @@
     font-size: 22px;
     color: var(--cream);
     margin-bottom: 6px;
-    padding-right: 88px;
+    padding-right: 20px;
     overflow-wrap: break-word;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
 
   .recipe-meta {
-    color: var(--muted);
+    color: #F5EDD6;
+    opacity: 0.8;
     font-size: 12px;
     display: flex;
     gap: 14px;
-    padding-right: 88px;
+    padding-right: 20px;
   }
 
   .recipe-meta span { display: flex; align-items: center; gap: 4px; }
-
-  .recipe-card-illustration {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    opacity: 0.85;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
-    pointer-events: none;
-  }
 
   /* ── RECIPE DETAIL ── */
   #detail { background: var(--cream); }
@@ -3022,6 +3134,40 @@
     padding: 18px; border-radius: 14px; font-size: 1rem; font-weight: 700;
     font-family: system-ui, -apple-system, sans-serif; cursor: pointer; margin-top: 8px;
   }
+
+  /* P1.3: Daten-Backup-Sektion */
+  .backup-section { margin: 16px 20px 0; background: var(--surface); border-radius: 14px; overflow: hidden; }
+  .backup-summary { padding: 14px 16px; cursor: pointer; font-weight: 500; font-size: 14px; color: var(--muted); list-style: none; user-select: none; min-height: 44px; display: flex; align-items: center; }
+  .backup-summary::-webkit-details-marker { display: none; }
+  .backup-content { padding: 0 16px 16px; }
+  .backup-hint { font-size: 13px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
+  .backup-btn { display: inline-block; margin-right: 8px; margin-bottom: 8px; padding: 10px 16px; background: var(--warm); color: white; border: none; border-radius: 10px; font-weight: 500; cursor: pointer; font-family: system-ui, -apple-system, sans-serif; min-height: 44px; font-size: 14px; }
+  .backup-btn input[type="file"] { display: none; }
+
+  /* P1.2: Großschrift global */
+  body.large-font { font-size: 17px; }
+  body.large-font .recipe-name { font-size: 1.25rem; }
+  body.large-font .recipe-tag { font-size: 0.85rem; }
+  body.large-font .step-title { font-size: 22px; }
+  body.large-font .step-content { font-size: 17px; line-height: 1.85; }
+  body.large-font .ingredient-row { font-size: 16px; padding: 10px 0; }
+  body.large-font .filter-chip,
+  body.large-font .allergen-chip { font-size: 14px; padding: 8px 16px; }
+  body.large-font .timer-display { font-size: 72px !important; }
+  body.large-font .nav-btn { font-size: 17px; padding: 18px; min-height: 56px; }
+  body.large-font .suite-tab-label { font-size: 0.65rem; }
+  body.large-font .detail-title { font-size: 26px; }
+  body.large-font .home-title { font-size: 56px; }
+
+  /* P1.2: Großschrift-Toggle auf Home */
+  .font-size-btn-home {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(212,168,71,0.3);
+    border-radius: 20px; padding: 5px 12px; color: var(--gold);
+    font-weight: 600; font-size: 12px; letter-spacing: 1px; cursor: pointer;
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 44px;
+  }
+  .font-size-btn-home.active { background: var(--warm); color: white; border-color: var(--warm); }
 </style>
 </head>
 <body data-world="brot">
@@ -3105,7 +3251,10 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
       <div class="app-logo" style="margin-bottom:0;">Brot &amp; Zeit</div>
       <!-- F-32: Sprache -->
-      <button id="langBtn" onclick="toggleLanguage()" style="background:rgba(255,255,255,0.08);border:none;color:var(--gold);font-size:12px;font-weight:500;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:system-ui, -apple-system, sans-serif,sans-serif;letter-spacing:1px;">DE / EN</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="fontSizeBtnHome" class="font-size-btn-home" onclick="toggleFontSize()" aria-label="Schriftgröße umschalten" title="Schrift groß/normal">A↕</button>
+        <button id="langBtn" onclick="toggleLanguage()" style="background:rgba(255,255,255,0.08);border:none;color:var(--gold);font-size:12px;font-weight:500;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:system-ui, -apple-system, sans-serif,sans-serif;letter-spacing:1px;min-height:44px;">DE / EN</button>
+      </div>
     </div>
     <div class="home-title" id="homeTitle">Back<br>dein Brot.</div>
     <div class="home-subtitle" id="homeSubtitle">Schritt für Schritt, mit Timer,<br>von Anfang bis Ende.</div>
@@ -3144,6 +3293,18 @@
       <div class="add-recipe-card-icon">✍️</div>
       Eigenes Rezept hinzufügen
     </div>
+    <!-- P1.3: Daten-Backup -->
+    <details class="backup-section" ontoggle="if(this.open) updateStorageUsage()">
+      <summary class="backup-summary">💾 Daten-Backup</summary>
+      <div class="backup-content">
+        <p class="backup-hint">Sichere deine Notizen, Bohnen und Backhistorie für ein neues Gerät.</p>
+        <button class="backup-btn" onclick="exportAllData()">⬇ Exportieren</button>
+        <label class="backup-btn">⬆ Importieren
+          <input type="file" accept="application/json" onchange="importAllData(this)">
+        </label>
+        <div id="backupUsage"></div>
+      </div>
+    </details>
   </div>
   <div class="bottom-nav-spacer"></div>
 </div>
@@ -3183,13 +3344,13 @@
   </div>
 
   <div class="scaler-section">
-    <div class="scaler-label">Wie viele Brote?</div>
+    <div class="scaler-label" id="scalerLabel">Wie viele Brote?</div>
     <div class="scaler-row">
       <button class="scale-btn" onclick="changeScale(-1)">−</button>
-      <input type="number" class="scale-free-input" id="scaleInput" min="1" max="99" value="1" inputmode="numeric" oninput="setScaleFree(this.value)">
+      <input type="number" class="scale-free-input" id="scaleInput" min="1" max="9999" value="1" inputmode="numeric" oninput="setScaleFree(this.value)">
       <button class="scale-btn" onclick="changeScale(1)">+</button>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:6px;">Brote (1–99 möglich)</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;" id="scalerSubText">Brote (1–99 möglich)</div>
   </div>
 
   <!-- N2: Allergen-Anzeige -->
@@ -3235,9 +3396,13 @@
   <!-- F-11: Zeitplan -->
   <div class="zeitplan-section">
     <div class="zeitplan-label">Zeitplanung</div>
+    <div style="margin-bottom:10px; display:flex; gap:16px;">
+      <label style="font-size:13px; color:var(--muted);"><input type="radio" name="zpMode" value="start" checked onchange="updateZeitplan()"> Ich starte um</label>
+      <label style="font-size:13px; color:var(--muted);"><input type="radio" name="zpMode" value="end" onchange="updateZeitplan()"> Fertig um</label>
+    </div>
     <div class="zeitplan-row">
       <input type="time" class="zeitplan-start-input" id="zeitplanStart" oninput="updateZeitplan()">
-      <div class="zeitplan-result" id="zeitplanResult">Startzeit eingeben →</div>
+      <div class="zeitplan-result" id="zeitplanResult">Uhrzeit eingeben →</div>
     </div>
     <div class="zeitplan-steps" id="zeitplanSteps"></div>
   </div>
@@ -3245,7 +3410,7 @@
   <div class="notes-section">
     <button class="notes-toggle" id="notesToggle" onclick="toggleNotes()">📝 Eigene Notizen</button>
     <div id="notesArea" style="display:none">
-      <textarea class="notes-area" id="recipeNotes" placeholder="Deine Anmerkungen zu diesem Rezept…" autocomplete="off" oninput="saveNotes()"></textarea>
+      <textarea class="notes-area" id="recipeNotes" placeholder="Deine Anmerkungen zu diesem Rezept…" autocomplete="off" maxlength="2000" oninput="saveNotes()"></textarea>
     </div>
   </div>
 
@@ -3311,7 +3476,7 @@
     <div class="step-notes-section">
       <button class="step-notes-toggle" onclick="toggleStepNotes()">📝 Notiz zu diesem Schritt</button>
       <div id="stepNotesArea" style="display:none">
-        <textarea class="step-notes-area" id="stepNotesInput" placeholder="z.B. Teig war heute weicher als sonst…" autocomplete="off" oninput="saveStepNote()"></textarea>
+        <textarea class="step-notes-area" id="stepNotesInput" placeholder="z.B. Teig war heute weicher als sonst…" autocomplete="off" maxlength="500" oninput="saveStepNote()"></textarea>
       </div>
     </div>
     <!-- N7: Familien-Aufgabenverteilung -->
@@ -3733,15 +3898,15 @@
   <div class="k-entry-body">
     <div class="k-field">
       <div class="k-field-label">BOHNE / SORTE</div>
-      <input class="k-input" id="k-bean-name" placeholder="z.B. Ethiopian Yirgacheffe" type="text">
+      <input class="k-input" id="k-bean-name" placeholder="z.B. Ethiopian Yirgacheffe" type="text" maxlength="80">
     </div>
     <div class="k-field">
       <div class="k-field-label">RÖSTEREI</div>
-      <input class="k-input" id="k-bean-roaster" placeholder="z.B. Five Elephant" type="text">
+      <input class="k-input" id="k-bean-roaster" placeholder="z.B. Five Elephant" type="text" maxlength="80">
     </div>
     <div class="k-field">
       <div class="k-field-label">HERKUNFTSLAND</div>
-      <input class="k-input" id="k-bean-origin" placeholder="z.B. Äthiopien" type="text">
+      <input class="k-input" id="k-bean-origin" placeholder="z.B. Äthiopien" type="text" maxlength="80">
     </div>
     <div class="k-field">
       <div class="k-field-label">RÖSTGRAD</div>
@@ -3782,7 +3947,7 @@
     </div>
     <div class="k-field">
       <div class="k-field-label">NOTIZEN</div>
-      <textarea class="k-input" id="k-bean-freetext" rows="3" placeholder="Florale Note, sehr sauber..." autocomplete="off"></textarea>
+      <textarea class="k-input" id="k-bean-freetext" rows="3" placeholder="Florale Note, sehr sauber..." autocomplete="off" maxlength="500"></textarea>
     </div>
     <button class="k-save-btn" onclick="saveBean()">Speichern</button>
   </div>
@@ -3793,9 +3958,55 @@
 // ══════════════════════════════════════════
 // SUITE — World-Switching & Tab-Nav
 // ══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// ONBOARDING LOGIC
+// ═══════════════════════════════════════════════════════
+const ONBOARDING_STEPS = [
+  { icon: '🍞', title: 'Brot & Zeit', text: 'Willkommen! Entdecke deine interaktive Küchen-Suite für perfektes handgemachtes Brot und Spezialitäten-Kaffee.' },
+  { icon: '⏱️', title: 'Smartes Timing', text: 'Wann willst du essen? Sag der App deine Ziel-Uhrzeit und der "Reverse-Schedule-Rechner" plant deinen gesamten Back-Tag.' },
+  { icon: '⚖️', title: 'Mehl-Skalierung', text: 'Nur noch 350g Mehl da? Tippe auf die Gramm-Zahl im Rezept und alle Zutaten passen sich stufenlos an!' }
+];
+let onboardIndex = 0;
+
+function showOnboardingIfNeeded() {
+  const hasSeen = localStorage.getItem('brot-onboarding-seen');
+  if (!hasSeen) {
+    document.getElementById('onboarding-modal').classList.add('active');
+    updateOnboarding();
+  }
+}
+
+function updateOnboarding() {
+  const step = ONBOARDING_STEPS[onboardIndex];
+  document.getElementById('onb-icon').textContent = step.icon;
+  document.getElementById('onb-title').textContent = step.title;
+  document.getElementById('onb-text').textContent = step.text;
+  for (let i = 0; i < 3; i++) {
+    document.getElementById('onb-dot-' + i).className = 'onboard-dot' + (i === onboardIndex ? ' active' : '');
+  }
+  document.querySelector('.onboard-btn').textContent = onboardIndex === 2 ? 'Loslegen' : 'Weiter';
+}
+
+function nextOnboarding() {
+  doHaptic();
+  if (onboardIndex < 2) {
+    onboardIndex++;
+    updateOnboarding();
+  } else {
+    document.getElementById('onboarding-modal').classList.remove('active');
+    localStorage.setItem('brot-onboarding-seen', 'true');
+  }
+}
+
 let currentWorld = 'brot';
 
+// P1.7: Debounce gegen Doppelklicks auf Tab-Bar
+let _switchWorldDebounce = false;
 function switchWorld(world) {
+  if (_switchWorldDebounce) return;
+  _switchWorldDebounce = true;
+  setTimeout(() => _switchWorldDebounce = false, 400);
+
   // Timer-Schutz: Kein Wechsel bei laufendem Timer
   if (world === 'kaffee' && typeof timerRunning !== 'undefined' && timerRunning) {
     showToast('⏱ Timer läuft noch — erst nach dem Backen wechseln');
@@ -3808,6 +4019,21 @@ function switchWorld(world) {
     return;
   }
 
+  // P1.7: Confirm wenn im Cooking-Screen
+  const cooking = document.getElementById('cooking');
+  if (world === 'kaffee' && cooking && cooking.classList.contains('active')) {
+    document.getElementById('confirmTitle').textContent = 'Zum Kaffee wechseln?';
+    document.getElementById('confirmSub').textContent = 'Dein Backfortschritt bleibt erhalten.';
+    document.getElementById('confirmOk').textContent = 'Ja, Kaffee';
+    document.getElementById('confirmCancel').textContent = 'Beim Brot bleiben';
+    confirmAction = () => _doSwitchWorld(world);
+    document.getElementById('confirmOverlay').classList.add('active');
+    return;
+  }
+  _doSwitchWorld(world);
+}
+
+function _doSwitchWorld(world) {
   currentWorld = world;
   document.body.dataset.world = world;
 
@@ -5119,6 +5345,8 @@ const RECIPES = [
 // ═══════════════════════════════════════════════════════
 let currentRecipe = null;
 let scale = 1;
+let baseFlour = 0;
+let isFlourScale = false;
 let currentStep = 0;
 let timerInterval = null;
 let timerSeconds = 0;
@@ -5174,7 +5402,7 @@ function getSavedProgress() {
     if (!raw) return null;
     const data = JSON.parse(raw);
     // Expire after 7 days (Sauerteig dauert 2 Tage)
-    if (Date.now() - data.timestamp > 7 * 24 * 60 * 60 * 1000) {
+    if (Date.now() - data.timestamp > 14 * 24 * 60 * 60 * 1000) {
       clearProgress();
       return null;
     }
@@ -5240,9 +5468,8 @@ function loadNotes() {
 
 function saveNotes() {
   if (!currentRecipe) return;
-  try {
-    localStorage.setItem('brot-notes-' + currentRecipe.id, document.getElementById('recipeNotes').value);
-  } catch(e) {}
+  // P1.4: Quota-sichere Speicherung
+  safeSetItem('brot-notes-' + currentRecipe.id, document.getElementById('recipeNotes').value);
 }
 
 function toggleNotes() {
@@ -5260,16 +5487,25 @@ function toggleNotes() {
 // WAKE LOCK — Screen bleibt beim Backen an
 // ═══════════════════════════════════════════════════════
 async function acquireWakeLock() {
-  if (!('wakeLock' in navigator)) return;
-  try {
-    wakeLockRef = await navigator.wakeLock.request('screen');
-  } catch(e) {}
+  if (window.Capacitor?.Plugins?.KeepAwake) {
+    try { await window.Capacitor.Plugins.KeepAwake.keepAwake(); } catch(e) {}
+  } else if ('wakeLock' in navigator) {
+    try { wakeLockRef = await navigator.wakeLock.request('screen'); } catch(e) {}
+  }
 }
 
-function releaseWakeLock() {
-  if (wakeLockRef) {
+async function releaseWakeLock() {
+  if (window.Capacitor?.Plugins?.KeepAwake) {
+    try { await window.Capacitor.Plugins.KeepAwake.allowSleep(); } catch(e) {}
+  } else if (wakeLockRef) {
     wakeLockRef.release().catch(() => {});
     wakeLockRef = null;
+  }
+}
+
+function doHaptic() {
+  if (window.Capacitor?.Plugins?.Haptics) {
+    window.Capacitor.Plugins.Haptics.impact({ style: 'light' });
   }
 }
 
@@ -5552,6 +5788,36 @@ const RECIPE_HERO_SVG = {
   </svg>`,
 };
 
+const RECIPE_PHOTOS = {
+  sauerteig: './img/sauerteig.png',
+  bauernbrot: './img/bauernbrot.png',
+  baguette: './img/baguette.png',
+  ciabatta: './img/ciabatta.png',
+  dinkelbrot: './img/dinkelbrot.png',
+  focaccia: './img/focaccia.png',
+  vollkornbrot: './img/vollkornbrot.png',
+  zopfbrot: './img/zopfbrot.png',
+  brioche: './img/brioche.png',
+  brezel: './img/brezel.png',
+  roggenbroetchen: './img/roggenbroetchen.png',
+  joghurtbrot: './img/joghurtbrot.png',
+  koernerbrot: './img/koernerbrot.png',
+  weissbrot: './img/weissbrot.png',
+  sesambroetchen: './img/sesambroetchen.png',
+  kurbiskernbrot: './img/kurbiskernbrot.png',
+  karottenbrot: './img/karottenbrot.png',
+  nussbrot: './img/nussbrot.png',
+  roggenmischbrot: './img/roggenmischbrot.png',
+  pumpernickel: './img/pumpernickel.png',
+  schwarzwaelder: './img/schwarzwaelder.png',
+  frankenlaib: './img/frankenlaib.png',
+  'berliner-landbrot': './img/berliner-landbrot.png',
+  'tiroler-bauernbrot': './img/tiroler-bauernbrot.png',
+  'allgaeuer-milchbrot': './img/allgaeuer-milchbrot.png',
+  starter: './img/starter.png',
+  _default: './img/bread_default.png'
+};
+
 function renderHome() {
   const list = document.getElementById('recipeList');
   // F-20: Filter anwenden
@@ -5562,14 +5828,19 @@ function renderHome() {
   }
   list.innerHTML = filtered.map(r => `
     <div class="recipe-card" data-emoji="${esc(r.emoji)}" onclick="openRecipe('${esc(r.id)}')">
-      <div class="recipe-tag">${esc(r.tag)}</div>
-      <div class="recipe-name">${esc(r.name)}</div>
-      <div class="recipe-meta">
-        <span>🕐 ${esc(r.totalTime)}</span>
-        <span>✋ ${esc(r.activeTime)}</span>
-        <span>${r.steps.length} Schritte</span>
+      <div class="recipe-card-bg">
+        <img src="${RECIPE_PHOTOS[r.id] || RECIPE_PHOTOS._default}" alt="">
       </div>
-      <div class="recipe-card-illustration">${RECIPE_SVG[r.id] || RECIPE_SVG._default}</div>
+      <div class="recipe-card-overlay"></div>
+      <div class="recipe-card-content">
+        <div class="recipe-tag">${esc(r.tag)}</div>
+        <div class="recipe-name">${esc(r.name)}</div>
+        <div class="recipe-meta">
+          <span>🕐 ${esc(r.totalTime)}</span>
+          <span>✋ ${esc(r.activeTime)}</span>
+          <span>${r.steps.length} Schritte</span>
+        </div>
+      </div>
     </div>
   `).join('');
 }
@@ -5580,13 +5851,35 @@ function renderHome() {
 function openRecipe(id) {
   currentRecipe = RECIPES.find(r => r.id === id);
   if (!currentRecipe) { showToast('Rezept nicht gefunden'); return; }
-  document.getElementById('d-hero').innerHTML = (RECIPE_HERO_SVG[currentRecipe.id] || RECIPE_HERO_SVG._default) + '<div class="detail-hero-overlay"></div>';
+  
+  const photoUrl = RECIPE_PHOTOS[currentRecipe.id] || RECIPE_PHOTOS._default;
+  document.getElementById('d-hero').innerHTML = `<img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;" alt="Hero">` + '<div class="detail-hero-overlay"></div>';
+  
   scale = 1;
   document.getElementById('d-tag').textContent = currentRecipe.tag;
   document.getElementById('d-title').textContent = currentRecipe.name;
   document.getElementById('d-time').textContent = currentRecipe.totalTime;
   document.getElementById('d-active').textContent = currentRecipe.activeTime;
   document.getElementById('d-steps').textContent = currentRecipe.steps.length;
+
+  baseFlour = 0;
+  isFlourScale = false;
+  currentRecipe.ingredients.forEach(i => {
+    if (i.unit === 'g' && i.name.toLowerCase().includes('mehl')) {
+      baseFlour += i.amount;
+    }
+  });
+  const scalerLabel = document.getElementById('scalerLabel');
+  const scalerSubText = document.getElementById('scalerSubText');
+  if (baseFlour > 0) {
+    isFlourScale = true;
+    if (scalerLabel) scalerLabel.textContent = 'Mehlmenge anpassen';
+    if (scalerSubText) scalerSubText.textContent = 'in Gramm (z.B. für deine Form)';
+  } else {
+    if (scalerLabel) scalerLabel.textContent = 'Wie viele Brote?';
+    if (scalerSubText) scalerSubText.textContent = 'Brote (1–99 möglich)';
+  }
+
   updateScaleDisplay();
   renderIngredients();
   renderAllergenBadges();
@@ -5601,18 +5894,27 @@ function openRecipe(id) {
   showStarterWarningIfNeeded();
   // F-11: Zeitplan zurücksetzen
   document.getElementById('zeitplanStart').value = '';
-  document.getElementById('zeitplanResult').textContent = 'Startzeit eingeben →';
+  document.getElementById('zeitplanResult').textContent = 'Uhrzeit eingeben →';
   document.getElementById('zeitplanSteps').classList.remove('visible');
   showScreen('detail');
 }
 
 function updateScaleDisplay() {
   const input = document.getElementById('scaleInput');
-  if (input) input.value = scale;
+  if (input) {
+    input.value = isFlourScale ? Math.round(baseFlour * scale) : scale;
+  }
 }
 
 function changeScale(delta) {
-  scale = Math.max(1, Math.min(99, scale + delta));
+  doHaptic();
+  if (isFlourScale) {
+    const currentGrams = Math.round(baseFlour * scale);
+    const newGrams = Math.max(50, currentGrams + (delta * 50));
+    scale = newGrams / baseFlour;
+  } else {
+    scale = Math.max(1, Math.min(99, scale + delta));
+  }
   updateScaleDisplay();
   renderIngredients();
 }
@@ -5677,7 +5979,28 @@ function _doStartCooking() {
   showScreen('cooking');
   saveProgress();
   acquireWakeLock();
+  // P1.6: Browser-Back abfangen
+  try { history.pushState({ inCooking: true, recipeId: currentRecipe.id }, '', '#cooking-' + currentRecipe.id); } catch(e) {}
 }
+
+// P1.6: Popstate-Listener (einmal beim Laden)
+window.addEventListener('popstate', () => {
+  const cooking = document.getElementById('cooking');
+  if (cooking && cooking.classList.contains('active')) {
+    try { history.pushState({ inCooking: true }, '', location.pathname + location.search); } catch(e) {}
+    document.getElementById('confirmTitle').textContent = 'Backen abbrechen?';
+    document.getElementById('confirmSub').textContent = 'Dein Fortschritt bleibt gespeichert.';
+    document.getElementById('confirmOk').textContent = 'Ja, raus';
+    document.getElementById('confirmCancel').textContent = 'Weiterbacken';
+    confirmAction = () => {
+      stopTimer();
+      try { releaseWakeLock(); } catch(e) {}
+      showScreen('home');
+      try { history.replaceState({}, '', location.pathname); } catch(e) {}
+    };
+    document.getElementById('confirmOverlay').classList.add('active');
+  }
+});
 
 function buildOverview() {
   const bar = document.getElementById('overviewBar');
@@ -5825,6 +6148,7 @@ let _navDebounce = false;
 function nextStep() {
   if (_navDebounce) return; _navDebounce = true; setTimeout(() => _navDebounce = false, 300);
   stopTimer();
+  doHaptic();
   if (currentStep < currentRecipe.steps.length - 1) {
     currentStep++;
     renderStep();
@@ -5870,6 +6194,7 @@ function nextStep() {
 function prevStep() {
   if (_navDebounce) return; _navDebounce = true; setTimeout(() => _navDebounce = false, 300);
   stopTimer();
+  doHaptic();
   if (currentStep > 0) {
     currentStep--;
     renderStep();
@@ -5942,6 +6267,7 @@ function updateTimerDisplay() {
 }
 
 function toggleTimer() {
+  doHaptic();
   if (timerRunning) {
     stopTimer();
     // F-12: Pause — Timer-State aktualisieren
@@ -5962,6 +6288,18 @@ function toggleTimer() {
     document.getElementById('timerEditHint').style.display = 'none';
     // F-12: Timer-Startzeit speichern
     saveTimerState();
+
+    if (window.Capacitor?.Plugins?.LocalNotifications) {
+      window.Capacitor.Plugins.LocalNotifications.schedule({
+        notifications: [{
+          title: "Brot & Zeit",
+          body: "⏰ Dein Brotteig braucht Aufmerksamkeit!",
+          id: 1,
+          schedule: { at: new Date(Date.now() + timerSeconds * 1000) }
+        }]
+      });
+    }
+
     timerInterval = setInterval(() => {
       if (timerSeconds > 0) timerSeconds--;
       updateTimerDisplay();
@@ -5977,6 +6315,9 @@ function toggleTimer() {
 }
 
 function stopTimer() {
+  if (window.Capacitor?.Plugins?.LocalNotifications) {
+    window.Capacitor.Plugins.LocalNotifications.cancel({ notifications: [{ id: 1 }] });
+  }
   clearInterval(timerInterval);
   timerInterval = null;
   timerRunning = false;
@@ -6006,8 +6347,11 @@ function openTimerEdit() {
 }
 
 function saveTimerEdit() {
-  const min = parseInt(document.getElementById('timerEditMin').value) || 0;
-  const sec = parseInt(document.getElementById('timerEditSec').value) || 0;
+  // P1.1: Clamp Min auf 0–1440 (24h), Sek auf 0–59
+  let min = parseInt(document.getElementById('timerEditMin').value) || 0;
+  let sec = parseInt(document.getElementById('timerEditSec').value) || 0;
+  min = Math.max(0, Math.min(1440, min));
+  sec = Math.max(0, Math.min(59, sec));
   const total = Math.max(0, min * 60 + sec);
   timerSeconds = total;
   timerOriginal = total;
@@ -6080,18 +6424,127 @@ function showToast(msg) {
 }
 
 // ═══════════════════════════════════════════════════════
+// P1.4: Sichere localStorage-Schreibung mit Quota-Warnung
+// ═══════════════════════════════════════════════════════
+function safeSetItem(key, val) {
+  try {
+    localStorage.setItem(key, val);
+    return true;
+  } catch(e) {
+    if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
+      showToast('⚠️ Speicher voll! Alte Fotos im Done-Screen löschen.');
+    } else {
+      showToast('⚠️ Speichern fehlgeschlagen');
+    }
+    return false;
+  }
+}
+
+function getStorageUsage() {
+  let total = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i) || '';
+      const v = localStorage.getItem(k) || '';
+      total += (k.length + v.length) * 2; // UTF-16
+    }
+  } catch(e) {}
+  return total;
+}
+
+function updateStorageUsage() {
+  const el = document.getElementById('backupUsage');
+  if (!el) return;
+  const bytes = getStorageUsage();
+  const mb = (bytes / 1024 / 1024).toFixed(2);
+  const pct = Math.min(100, Math.round((bytes / (5 * 1024 * 1024)) * 100));
+  const color = pct > 80 ? '#D32F2F' : 'var(--warm)';
+  el.innerHTML = '<div style="font-size:12px;color:var(--muted);margin-top:8px;">Belegt: ' + mb + ' / 5 MB <div style="height:4px;background:rgba(0,0,0,0.08);border-radius:2px;margin-top:4px;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + color + ';"></div></div></div>';
+}
+
+// ═══════════════════════════════════════════════════════
+// P1.3: Daten-Export / -Import für Geräte-Migration
+// ═══════════════════════════════════════════════════════
+function exportAllData() {
+  const data = {};
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('brot-') || key.startsWith('k-') || key.startsWith('suite-'))) {
+        data[key] = localStorage.getItem(key);
+      }
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'kuechen-suite-backup-' + new Date().toISOString().split('T')[0] + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+    showToast('✓ Backup heruntergeladen');
+  } catch(e) {
+    showToast('⚠️ Export fehlgeschlagen');
+  }
+}
+
+function importAllData(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  if (!confirm('Aktuelle Daten werden überschrieben. Fortfahren?')) {
+    input.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      let count = 0;
+      Object.entries(data).forEach(([k, v]) => {
+        if (typeof k === 'string' && (k.startsWith('brot-') || k.startsWith('k-') || k.startsWith('suite-')) && typeof v === 'string') {
+          localStorage.setItem(k, v);
+          count++;
+        }
+      });
+      showToast('✓ ' + count + ' Einträge importiert');
+      setTimeout(() => location.reload(), 1500);
+    } catch(err) {
+      showToast('⚠️ Import fehlgeschlagen: ungültige Datei');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════════════
 // F-11: ZEITPLAN
 // ═══════════════════════════════════════════════════════
 function updateZeitplan() {
   if (!currentRecipe) return;
   const input = document.getElementById('zeitplanStart').value;
+  const modeRadio = document.querySelector('input[name="zpMode"]:checked');
+  const mode = modeRadio ? modeRadio.value : 'start';
+  
   if (!input) {
-    document.getElementById('zeitplanResult').textContent = 'Startzeit eingeben →';
+    document.getElementById('zeitplanResult').textContent = 'Uhrzeit eingeben →';
     document.getElementById('zeitplanSteps').classList.remove('visible');
     return;
   }
   const [h, m] = input.split(':').map(Number);
   let cursor = h * 60 + m; // Minuten seit Mitternacht
+
+  // Gesamtdauer berechnen
+  let totalDuration = 0;
+  currentRecipe.steps.forEach(step => {
+    totalDuration += step.timer ? Math.ceil(step.timer / 60) : 5;
+  });
+
+  if (mode === 'end') {
+    cursor = cursor - totalDuration;
+    if (cursor < 0) {
+      cursor = (24 * 60) + (cursor % (24 * 60));
+    }
+  }
 
   const stepsHtml = currentRecipe.steps.map((step, i) => {
     const hh = Math.floor(cursor / 60) % 24;
@@ -6111,7 +6564,18 @@ function updateZeitplan() {
   const endHH = Math.floor(cursor / 60) % 24;
   const endMM = cursor % 60;
   const endStr = `${String(endHH).padStart(2,'0')}:${String(endMM).padStart(2,'0')}`;
-  document.getElementById('zeitplanResult').innerHTML = `Fertig ca. <strong>${endStr} Uhr</strong> <span style="font-size:11px;color:var(--muted)">(± 30 Min)</span>`;
+
+  if (mode === 'start') {
+    document.getElementById('zeitplanResult').innerHTML = `Fertig ca. <strong>${endStr} Uhr</strong> <span style="font-size:11px;color:var(--muted)">(± 30 Min)</span>`;
+  } else {
+    // Startzeit war cursor vor dem Loop
+    let startCursor = h * 60 + m - totalDuration;
+    if (startCursor < 0) startCursor = (24 * 60) + (startCursor % (24 * 60));
+    const startHH = Math.floor(startCursor / 60) % 24;
+    const startMM = startCursor % 60;
+    const startStr = `${String(startHH).padStart(2,'0')}:${String(startMM).padStart(2,'0')}`;
+    document.getElementById('zeitplanResult').innerHTML = `Start um <strong>${startStr} Uhr</strong> <span style="font-size:11px;color:var(--muted)">(± 30 Min)</span>`;
+  }
   document.getElementById('zeitplanSteps').innerHTML = stepsHtml;
   document.getElementById('zeitplanSteps').classList.add('visible');
 }
@@ -6190,9 +6654,18 @@ function snoozeAlarm() {
 // F-14: SCALER FREIFELD
 // ═══════════════════════════════════════════════════════
 function setScaleFree(val) {
-  const n = parseInt(val);
-  if (isNaN(n) || n < 1) return;
-  scale = Math.min(99, n);
+  let n = parseInt(val);
+  if (isNaN(n) || n < 1) n = 1;
+  // P1.1: Clamp + Warning bei großen Mengen
+  n = Math.max(1, Math.min(99, n));
+  if (isFlourScale) {
+    scale = n / baseFlour;
+  } else {
+    scale = n;
+    if (n > 20) showToast('⚠️ ' + n + ' Brote? Wirklich so viele?');
+  }
+  const inp = document.getElementById('scaleInput');
+  if (inp && inp.value !== String(n)) inp.value = n;
   renderIngredients();
 }
 
@@ -6253,10 +6726,9 @@ function loadStepNote() {
 
 function saveStepNote() {
   if (!currentRecipe) return;
-  try {
-    const key = `brot-stepnote-${currentRecipe.id}-${currentStep}`;
-    localStorage.setItem(key, document.getElementById('stepNotesInput').value);
-  } catch(e) {}
+  // P1.4: Quota-sichere Speicherung
+  const key = `brot-stepnote-${currentRecipe.id}-${currentStep}`;
+  safeSetItem(key, document.getElementById('stepNotesInput').value);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -6832,6 +7304,7 @@ function openShoppingList() {
 }
 
 function toggleShoppingItem(idx) {
+  doHaptic();
   if (!currentRecipe) return;
   const storeKey = 'brot-sl-' + currentRecipe.id;
   const checked = JSON.parse(localStorage.getItem(storeKey) || '{}');
@@ -6923,6 +7396,12 @@ function toggleKidsMode() {
 function handlePhotoUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
+  // P1.1: Größenlimit 10 MB
+  if (file.size > 10 * 1024 * 1024) {
+    showToast('⚠️ Foto zu groß (max 10 MB)');
+    event.target.value = '';
+    return;
+  }
   // SEC-05 FIX: Validate MIME type in JS (the HTML accept attribute is bypassable).
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif'];
   if (!ALLOWED_TYPES.includes(file.type)) {
@@ -6958,9 +7437,8 @@ function handlePhotoUpload(event) {
       wrap.appendChild(caption);
       preview.appendChild(wrap);
       if (currentRecipe) {
-        try { localStorage.setItem('brot-photo-' + currentRecipe.id, compressed); } catch(e2) {
-          showToast('Foto zu groß für Speicher');
-        }
+        // P1.4: Quota-sichere Speicherung mit Toast
+        if (!safeSetItem('brot-photo-' + currentRecipe.id, compressed)) return;
       }
       showToast('📸 Foto gespeichert!');
     };
@@ -6981,7 +7459,8 @@ function setRating(stars, silent) {
     btn.classList.toggle('active', i <= stars);
   }
   if (currentRecipe) {
-    try { localStorage.setItem('brot-rating-' + currentRecipe.id, stars); } catch(e) {}
+    // P1.4: Quota-sichere Speicherung
+    safeSetItem('brot-rating-' + currentRecipe.id, stars);
   }
   if (!silent) showToast('⭐ Bewertung gespeichert: ' + stars + ' von 5');
 }
@@ -7145,12 +7624,36 @@ let largeFontActive = false;
 
 function toggleFontSize() {
   largeFontActive = !largeFontActive;
+  // P1.2: Großschrift global statt nur cooking-screen
   document.body.classList.toggle('text-lg', largeFontActive);
-  document.getElementById('fontSizeBtn').textContent = largeFontActive ? 'Aa' : 'A';
-  document.getElementById('fontSizeBtn').style.fontSize = largeFontActive ? '13px' : '14px';
-  document.getElementById('fontSizeBtn').style.background = largeFontActive ? 'var(--warm)' : 'rgba(255,255,255,0.08)';
-  try { localStorage.setItem('brot-large-font', largeFontActive ? '1' : '0'); } catch(e) {}
+  document.body.classList.toggle('large-font', largeFontActive);
+  // Cooking-Screen Button (existiert nur dort)
+  const cookingBtn = document.getElementById('fontSizeBtn');
+  if (cookingBtn) {
+    cookingBtn.textContent = largeFontActive ? 'Aa' : 'A';
+    cookingBtn.style.fontSize = largeFontActive ? '13px' : '14px';
+    cookingBtn.style.background = largeFontActive ? 'var(--warm)' : 'rgba(255,255,255,0.08)';
+  }
+  // Home-Screen Button
+  const homeBtn = document.getElementById('fontSizeBtnHome');
+  if (homeBtn) homeBtn.classList.toggle('active', largeFontActive);
+  safeSetItem('brot-large-font', largeFontActive ? '1' : '0');
 }
+
+// P1.2: Großschrift beim Laden wiederherstellen
+(function restoreFontSize() {
+  try {
+    if (localStorage.getItem('brot-large-font') === '1') {
+      largeFontActive = true;
+      document.body.classList.add('text-lg');
+      document.body.classList.add('large-font');
+      document.addEventListener('DOMContentLoaded', () => {
+        const homeBtn = document.getElementById('fontSizeBtnHome');
+        if (homeBtn) homeBtn.classList.add('active');
+      });
+    }
+  } catch(e) {}
+})();
 
 // ═══════════════════════════════════════════════════════
 // BOTTOM NAVIGATION
@@ -7719,8 +8222,16 @@ renderCalendar();
 
 // SEC-03 FIX: External Unsplash URLs removed to prevent IP/referrer data leakage to third party.
 // Photos replaced with empty strings — fallback emoji UI is used instead.
-const BREW_PHOTOS = {};
-
+const BREW_PHOTOS = {
+  'pourover': './img/pourover.png',
+  'espresso': './img/espresso.png',
+  'frenchpress': './img/frenchpress.png',
+  'aeropress': './img/aeropress.png',
+  'mokapot': './img/mokapot.png',
+  'coldbrew': './img/coldbrew.png',
+  'chemex': './img/chemex.png',
+  'tuerkisch': './img/tuerkisch.png'
+};
 const BREW_METHODS = [
   {
     id: 'pourover',
@@ -8049,6 +8560,7 @@ function renderKStep() {
 }
 
 function toggleKTimer() {
+  doHaptic();
   const step = currentMethod.steps[kCurrentStep];
   if (!step.timer) return;
   if (kTimerRunning) {
@@ -8057,12 +8569,28 @@ function toggleKTimer() {
     kTimerRunning = false;
     document.getElementById('k-timer-btn').textContent = '▶ Weiter';
     document.getElementById('k-timer-circle').classList.remove('running');
+    if (window.Capacitor?.Plugins?.LocalNotifications) {
+      window.Capacitor.Plugins.LocalNotifications.cancel({ notifications: [{ id: 2 }] });
+    }
   } else {
+    requestNotificationPermission();
     clearInterval(kTimerInterval);
     kTimerInterval = null;
     kTimerRunning = true;
     document.getElementById('k-timer-btn').textContent = '⏸ Pause';
     document.getElementById('k-timer-circle').classList.add('running');
+    
+    if (window.Capacitor?.Plugins?.LocalNotifications) {
+      window.Capacitor.Plugins.LocalNotifications.schedule({
+        notifications: [{
+          title: "Brot & Zeit",
+          body: "☕ Kaffee Timer beendet!",
+          id: 2,
+          schedule: { at: new Date(Date.now() + kTimerSeconds * 1000) }
+        }]
+      });
+    }
+
     kTimerInterval = setInterval(() => {
       kTimerSeconds--;
       document.getElementById('k-timer-display').textContent = formatKTime(kTimerSeconds);
