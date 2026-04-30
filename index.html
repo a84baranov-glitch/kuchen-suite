@@ -3168,6 +3168,48 @@
     min-height: 44px;
   }
   .font-size-btn-home.active { background: var(--warm); color: white; border-color: var(--warm); }
+
+  /* P2.5: Saison-Banner */
+  .season-banner {
+    margin: 16px 20px 12px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+    border-radius: 14px;
+    border-left: 4px solid var(--gold);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .season-banner:active { transform: scale(0.98); }
+  .season-banner-row { display: flex; align-items: center; gap: 12px; }
+  .season-banner-emoji { font-size: 32px; }
+  .season-banner-text { flex: 1; }
+  .season-banner-title { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
+  .season-banner-sub { font-size: 12px; color: var(--muted); }
+  .season-banner-arrow { font-size: 18px; color: var(--gold); }
+  .recipe-card.season-highlight {
+    border: 2px solid var(--gold);
+    box-shadow: 0 4px 16px rgba(212,168,71,0.25);
+  }
+  .recipe-card.season-highlight::after {
+    content: '⭐ Saison';
+    position: absolute; top: 8px; right: 8px;
+    background: var(--gold); color: white;
+    padding: 3px 8px; border-radius: 12px;
+    font-size: 10px; font-weight: 600;
+    z-index: 2;
+  }
+
+  /* P2.NEU: Bohnen-Methoden-Empfehlungen */
+  .bean-rec-section { margin-top: 12px; padding: 12px; background: rgba(224,123,57,0.08); border-radius: 12px; }
+  .bean-rec-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--k-warm, #E07B39); margin-bottom: 8px; font-weight: 600; }
+  .bean-rec-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .bean-rec-chip {
+    background: white; border: 1px solid rgba(224,123,57,0.3);
+    border-radius: 12px; padding: 8px 14px; font-size: 13px;
+    cursor: pointer; color: var(--dark); font-family: system-ui, -apple-system, sans-serif;
+    min-height: 44px;
+  }
+  .bean-rec-chip.top { background: var(--k-warm, #E07B39); color: white; border-color: var(--k-warm, #E07B39); font-weight: 600; }
 </style>
 </head>
 <body data-world="brot">
@@ -3281,12 +3323,15 @@
     <div class="allergen-chip" onclick="setAllergenFilter('nussfrei', this)">🥜 Nussfrei</div>
     <div class="allergen-chip" onclick="setAllergenFilter('eifrei', this)">🥚 Eifrei</div>
     <div class="allergen-chip" onclick="setAllergenFilter('sesamfrei', this)">🫘 Sesamfrei</div>
+    <div class="allergen-chip" onclick="setAllergenFilter('vegan', this)">🌱 Vegan</div>
   </div>
   <div class="recipes-section">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div class="section-label" style="margin-bottom:0">Rezepte</div>
       <button onclick="openHistory()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;">📋 Protokoll</button>
     </div>
+    <!-- P2.5: Saison-Banner -->
+    <div id="seasonBanner" class="season-banner" style="display:none"></div>
     <div id="recipeList"></div>
     <!-- F-22: Eigenes Rezept hinzufügen -->
     <div class="add-recipe-card" onclick="openCustomRecipe()">
@@ -3949,6 +3994,8 @@
       <div class="k-field-label">NOTIZEN</div>
       <textarea class="k-input" id="k-bean-freetext" rows="3" placeholder="Florale Note, sehr sauber..." autocomplete="off" maxlength="500"></textarea>
     </div>
+    <!-- P2.NEU: Methoden-Empfehlung -->
+    <div id="beanRecommendations" class="bean-rec-section"></div>
     <button class="k-save-btn" onclick="saveBean()">Speichern</button>
   </div>
 </div>
@@ -5338,6 +5385,228 @@ const RECIPES = [
       { title: 'Backen', content: '180°C, 30–35 Minuten bis das Brot goldbraun ist. Vor dem Backen nochmals mit Ei bestreichen.', timer: 2100, ingredientIdxs: [] },
     ],
   },
+  {
+    id: 'buchweizen-gf',
+    name: 'Glutenfreies Buchweizenbrot',
+    tag: 'Glutenfrei · Hefe',
+    emoji: '🌾',
+    totalTime: '3 Std',
+    activeTime: '~25 Min',
+    ingredients: [
+      { name: 'Buchweizenmehl', amount: 250, unit: 'g' },
+      { name: 'Reismehl (hell)', amount: 150, unit: 'g' },
+      { name: 'Tapiokamehl', amount: 100, unit: 'g' },
+      { name: 'Flohsamenschalen (gemahlen)', amount: 15, unit: 'g' },
+      { name: 'Wasser (lauwarm)', amount: 400, unit: 'ml' },
+      { name: 'Hefe (frisch)', amount: 15, unit: 'g' },
+      { name: 'Salz', amount: 10, unit: 'g' },
+      { name: 'Apfelessig', amount: 10, unit: 'ml' },
+    ],
+    steps: [
+      { title: 'Flohsamen quellen', content: 'Flohsamenschalen mit 100 ml Wasser verrühren und 10 Minuten quellen lassen — das ersetzt das Gluten und gibt Bindung.', timer: 600, ingredientIdxs: [3] },
+      { title: 'Hefe aktivieren', content: 'Hefe in 100 ml lauwarmem Wasser mit einer Prise Zucker auflösen, 5 Minuten warten bis sie schäumt.', timer: 300, ingredientIdxs: [5] },
+      { title: 'Teig mischen', content: 'Alle Mehle + Salz vermischen. Flohsamen-Gel, Hefemilch, restliches Wasser und Apfelessig dazugeben. 5 Min mit Holzlöffel oder Spatel kräftig rühren — kein Kneten nötig (kein Gluten).', timer: 300, ingredientIdxs: [0, 1, 2, 4, 6, 7] },
+      { title: 'Stockgare', content: 'Teig in eine geölte Kastenform (25 cm) füllen, mit feuchtem Tuch abdecken. 1,5 Stunden gehen lassen.', timer: 5400, ingredientIdxs: [] },
+      { title: 'Backen', content: '210°C Ober-/Unterhitze, 50 Minuten. Der Teig bekommt eine richtig knusprige Kruste. Stäbchenprobe: muss trocken rauskommen.', timer: 3000, ingredientIdxs: [] },
+      { title: 'Auskühlen', content: 'Mindestens 1 Stunde komplett auskühlen lassen — sonst krümelt das glutenfreie Brot. Am besten erst am nächsten Tag schneiden.', timer: null, ingredientIdxs: [] },
+    ],
+  },
+  {
+    id: 'maishirse-gf',
+    name: 'Mais-Hirse-Brot (glutenfrei)',
+    tag: 'Glutenfrei · Vegan',
+    emoji: '🌽',
+    totalTime: '2,5 Std',
+    activeTime: '~20 Min',
+    ingredients: [
+      { name: 'Maismehl (fein)', amount: 200, unit: 'g' },
+      { name: 'Hirseflocken', amount: 100, unit: 'g' },
+      { name: 'Reismehl', amount: 200, unit: 'g' },
+      { name: 'Xanthan', amount: 5, unit: 'g' },
+      { name: 'Wasser (lauwarm)', amount: 380, unit: 'ml' },
+      { name: 'Hefe (frisch)', amount: 12, unit: 'g' },
+      { name: 'Olivenöl', amount: 30, unit: 'ml' },
+      { name: 'Salz', amount: 9, unit: 'g' },
+    ],
+    steps: [
+      { title: 'Hirse einweichen', content: 'Hirseflocken mit 100 ml heißem Wasser übergießen und 15 Minuten quellen lassen.', timer: 900, ingredientIdxs: [1] },
+      { title: 'Hefe ansetzen', content: 'Hefe in 80 ml lauwarmem Wasser auflösen.', timer: 300, ingredientIdxs: [5] },
+      { title: 'Teig anrühren', content: 'Alle Mehle, Xanthan und Salz vermischen. Hefemilch, restliches Wasser, Hirsegel und Olivenöl dazugeben. 4 Minuten kräftig rühren.', timer: 240, ingredientIdxs: [0, 2, 3, 4, 6, 7] },
+      { title: 'Gehen lassen', content: 'In gefettete Kastenform geben, abgedeckt 1 Stunde gehen lassen.', timer: 3600, ingredientIdxs: [] },
+      { title: 'Backen', content: '200°C, 45 Minuten. Goldgelbe Kruste, leicht süßlicher Mais-Geschmack.', timer: 2700, ingredientIdxs: [] },
+    ],
+  },
+  {
+    id: 'mandelkokos-gf',
+    name: 'Mandel-Kokos-Brot (Low-Carb, glutenfrei)',
+    tag: 'Glutenfrei · Low-Carb',
+    emoji: '🥥',
+    totalTime: '1 Std',
+    activeTime: '~10 Min',
+    ingredients: [
+      { name: 'Mandelmehl (entölt)', amount: 200, unit: 'g' },
+      { name: 'Kokosmehl', amount: 80, unit: 'g' },
+      { name: 'Eier (Größe M)', amount: 5, unit: 'Stk' },
+      { name: 'Apfelessig', amount: 15, unit: 'ml' },
+      { name: 'Backpulver', amount: 12, unit: 'g' },
+      { name: 'Salz', amount: 5, unit: 'g' },
+      { name: 'Wasser', amount: 100, unit: 'ml' },
+      { name: 'Sonnenblumenkerne', amount: 30, unit: 'g' },
+    ],
+    steps: [
+      { title: 'Eier aufschlagen', content: 'Eier mit Apfelessig in einer großen Schüssel kurz mit dem Schneebesen verquirlen.', timer: null, ingredientIdxs: [2, 3] },
+      { title: 'Mehlmischung', content: 'Mandelmehl, Kokosmehl, Backpulver und Salz separat vermischen. Sonnenblumenkerne dazu.', timer: null, ingredientIdxs: [0, 1, 4, 5, 7] },
+      { title: 'Teig vereinen', content: 'Mehlmischung zu den Eiern geben, Wasser dazu, mit Spatel zu einem dicken Teig vermischen.', timer: null, ingredientIdxs: [6] },
+      { title: 'In Form füllen', content: 'In gefettete Kastenform (20 cm) füllen, glattstreichen. Mit weiteren Sonnenblumenkernen bestreuen wenn gewünscht.', timer: null, ingredientIdxs: [] },
+      { title: 'Backen', content: '180°C Ober-/Unterhitze, 50 Minuten. Stäbchenprobe! Brot ist sehr nahrhaft, hält 5 Tage im Kühlschrank.', timer: 3000, ingredientIdxs: [] },
+    ],
+  },
+  {
+    id: 'reissauerteig-gf',
+    name: 'Glutenfreies Reissauerteigbrot',
+    tag: 'Glutenfrei · Sauerteig',
+    emoji: '🍚',
+    totalTime: '24 Std',
+    activeTime: '~30 Min',
+    ingredients: [
+      { name: 'Reismehl (Vollkorn)', amount: 250, unit: 'g' },
+      { name: 'Buchweizenmehl', amount: 200, unit: 'g' },
+      { name: 'Tapiokamehl', amount: 50, unit: 'g' },
+      { name: 'Reissauerteig-Starter (oder normaler GF-Starter)', amount: 150, unit: 'g' },
+      { name: 'Wasser', amount: 380, unit: 'ml' },
+      { name: 'Flohsamenschalen', amount: 18, unit: 'g' },
+      { name: 'Salz', amount: 10, unit: 'g' },
+    ],
+    steps: [
+      { title: 'Vorteig', content: 'Starter mit 150 ml Wasser und 100 g Reismehl verrühren. Abgedeckt 8 Stunden bei Raumtemperatur fermentieren.', timer: null, ingredientIdxs: [0, 3, 4] },
+      { title: 'Flohsamen quellen', content: 'Flohsamenschalen mit 80 ml Wasser anrühren, 10 Minuten warten bis es ein Gel bildet.', timer: 600, ingredientIdxs: [5] },
+      { title: 'Hauptteig', content: 'Vorteig, Flohsamen-Gel, restliche Mehle, restliches Wasser und Salz 5 Minuten gut verrühren.', timer: 300, ingredientIdxs: [1, 2, 6] },
+      { title: 'Stockgare', content: '4 Stunden bei 28°C abgedeckt gehen lassen.', timer: 14400, ingredientIdxs: [] },
+      { title: 'Formen', content: 'Teig in geölte Kastenform geben (Hände nass machen, da sehr klebrig). Oberfläche mit feuchtem Spatel glätten.', timer: null, ingredientIdxs: [] },
+      { title: 'Stückgare', content: '1 Stunde gehen lassen.', timer: 3600, ingredientIdxs: [] },
+      { title: 'Backen', content: '230°C, 15 Min mit Dampf, dann 200°C weitere 40 Min. Innentemperatur 96°C. Komplett auskühlen!', timer: 3300, ingredientIdxs: [] },
+    ],
+  },
+  {
+    id: 'stollen',
+    name: 'Christstollen',
+    tag: 'Saison · Dezember',
+    emoji: '🎄',
+    totalTime: '4 Std + 4 Wochen Reifung',
+    activeTime: '~50 Min',
+    ingredients: [
+      { name: 'Weizenmehl Type 405', amount: 500, unit: 'g' },
+      { name: 'Hefe (frisch)', amount: 30, unit: 'g' },
+      { name: 'Vollmilch (warm)', amount: 200, unit: 'ml' },
+      { name: 'Butter (weich)', amount: 250, unit: 'g' },
+      { name: 'Zucker', amount: 100, unit: 'g' },
+      { name: 'Salz', amount: 5, unit: 'g' },
+      { name: 'Sultaninen', amount: 200, unit: 'g' },
+      { name: 'Mandeln (gehackt)', amount: 100, unit: 'g' },
+      { name: 'Zitronat', amount: 50, unit: 'g' },
+      { name: 'Orangeat', amount: 50, unit: 'g' },
+      { name: 'Rum', amount: 50, unit: 'ml' },
+      { name: 'Marzipan-Rohmasse', amount: 150, unit: 'g' },
+      { name: 'Butter (geschmolzen, zum Bestreichen)', amount: 100, unit: 'g' },
+      { name: 'Puderzucker', amount: 100, unit: 'g' },
+    ],
+    steps: [
+      { title: 'Früchte einweichen', content: 'Sultaninen, Zitronat, Orangeat in eine Schüssel geben, mit Rum übergießen. Mindestens 4 Stunden ziehen lassen — über Nacht ist besser.', timer: null, ingredientIdxs: [6, 8, 9, 10] },
+      { title: 'Vorteig', content: 'Hefe in warmer Milch mit 1 EL Zucker auflösen. 100 g Mehl dazugeben, kurz verrühren. 30 Min gehen lassen bis Blasen entstehen.', timer: 1800, ingredientIdxs: [1, 2] },
+      { title: 'Hauptteig', content: 'Restliches Mehl, Butter, Zucker, Salz und Vorteig 10 Min kneten. Eingeweichte Früchte und Mandeln vorsichtig unterheben.', timer: 600, ingredientIdxs: [0, 3, 4, 5, 7] },
+      { title: 'Stockgare', content: '90 Minuten an warmem Ort gehen lassen.', timer: 5400, ingredientIdxs: [] },
+      { title: 'Formen', content: 'Teig zu einem Rechteck ausrollen (1,5 cm dick). Marzipan zu einer Rolle formen und in die Mitte legen. Teig zu einer Stollen-Form falten — eine Hälfte über die andere klappen.', timer: null, ingredientIdxs: [11] },
+      { title: 'Stückgare', content: '30 Minuten gehen lassen.', timer: 1800, ingredientIdxs: [] },
+      { title: 'Backen', content: '180°C Ober-/Unterhitze, 60 Minuten. Bei zu starker Bräunung mit Alufolie abdecken.', timer: 3600, ingredientIdxs: [] },
+      { title: 'Buttern + Zuckern', content: 'Heißen Stollen großzügig mit geschmolzener Butter bestreichen, dick mit Puderzucker bedecken. Mehrfach wiederholen bis Butter aufgesogen ist.', timer: null, ingredientIdxs: [12, 13] },
+      { title: 'Reifung', content: '🎄 In Alufolie wickeln, kühl (10–15°C) lagern. Mindestens 2 Wochen, besser 4 Wochen reifen lassen — entwickelt erst dann sein volles Aroma.', timer: null, ingredientIdxs: [] },
+    ],
+  },
+  {
+    id: 'osterzopf',
+    name: 'Osterzopf',
+    tag: 'Saison · März/April',
+    emoji: '🐰',
+    totalTime: '3 Std',
+    activeTime: '~30 Min',
+    ingredients: [
+      { name: 'Weizenmehl Type 550', amount: 500, unit: 'g' },
+      { name: 'Hefe (frisch)', amount: 20, unit: 'g' },
+      { name: 'Vollmilch (warm)', amount: 250, unit: 'ml' },
+      { name: 'Butter (weich)', amount: 80, unit: 'g' },
+      { name: 'Zucker', amount: 70, unit: 'g' },
+      { name: 'Salz', amount: 8, unit: 'g' },
+      { name: 'Eier (Größe M)', amount: 2, unit: 'Stk' },
+      { name: 'Vanillezucker', amount: 8, unit: 'g' },
+      { name: 'Rosinen (optional)', amount: 80, unit: 'g' },
+      { name: 'Hagelzucker', amount: 30, unit: 'g' },
+      { name: 'Ei (zum Bestreichen)', amount: 1, unit: 'Stk' },
+    ],
+    steps: [
+      { title: 'Hefemilch', content: 'Hefe in warmer Milch mit 1 EL Zucker auflösen, 5 Min stehen lassen.', timer: 300, ingredientIdxs: [1, 2] },
+      { title: 'Teig kneten', content: 'Mehl, restlicher Zucker, Salz, Butter, 2 Eier, Vanillezucker und Hefemilch 10 Min kneten. Optional Rosinen unterkneten.', timer: 600, ingredientIdxs: [0, 3, 4, 5, 6, 7, 8] },
+      { title: 'Stockgare', content: '90 Minuten gehen lassen bis sich der Teig verdoppelt hat.', timer: 5400, ingredientIdxs: [] },
+      { title: 'Zopf flechten', content: 'Teig in 3 gleiche Stücke teilen, jedes zu einem 50 cm langen Strang rollen. An einem Ende zusammendrücken, dann flechten. Enden zusammendrücken und unterschlagen.', timer: null, ingredientIdxs: [] },
+      { title: 'Stückgare', content: 'Auf Backblech setzen, 30 Min gehen lassen.', timer: 1800, ingredientIdxs: [] },
+      { title: 'Backen', content: 'Mit verquirltem Ei bestreichen, mit Hagelzucker bestreuen. 175°C Ober-/Unterhitze, 30–35 Minuten goldbraun backen.', timer: 2100, ingredientIdxs: [9, 10] },
+    ],
+  },
+  {
+    id: 'lebkuchen',
+    name: 'Elisenlebkuchen',
+    tag: 'Saison · November/Dezember',
+    emoji: '🍪',
+    totalTime: '40 Min + 1 Tag Ruhe',
+    activeTime: '~30 Min',
+    ingredients: [
+      { name: 'Mandeln (gemahlen)', amount: 200, unit: 'g' },
+      { name: 'Haselnüsse (gemahlen)', amount: 200, unit: 'g' },
+      { name: 'Eier', amount: 4, unit: 'Stk' },
+      { name: 'Zucker', amount: 200, unit: 'g' },
+      { name: 'Lebkuchengewürz', amount: 15, unit: 'g' },
+      { name: 'Zitronat (fein gehackt)', amount: 50, unit: 'g' },
+      { name: 'Orangeat (fein gehackt)', amount: 50, unit: 'g' },
+      { name: 'Backoblaten (70mm)', amount: 30, unit: 'Stk' },
+      { name: 'Schokoglasur (dunkel)', amount: 200, unit: 'g' },
+    ],
+    steps: [
+      { title: 'Eier-Zucker-Schaum', content: 'Eier mit Zucker 5 Minuten cremig schlagen bis die Masse hell und schaumig ist.', timer: 300, ingredientIdxs: [2, 3] },
+      { title: 'Trockene Zutaten', content: 'Mandeln, Haselnüsse, Lebkuchengewürz, Zitronat und Orangeat vermischen.', timer: null, ingredientIdxs: [0, 1, 4, 5, 6] },
+      { title: 'Teig vereinen', content: 'Trockene Mischung vorsichtig unter den Eierschaum heben.', timer: null, ingredientIdxs: [] },
+      { title: 'Auf Oblaten', content: 'Mit zwei Teelöffeln häufchenweise Teig auf die Oblaten setzen, leicht glatt streichen. Auf Backblech mit Backpapier verteilen.', timer: null, ingredientIdxs: [7] },
+      { title: 'Trocknen lassen', content: 'Bei Raumtemperatur 4–6 Stunden trocknen lassen — wichtig für die Lebkuchen-Struktur!', timer: null, ingredientIdxs: [] },
+      { title: 'Backen', content: '160°C Ober-/Unterhitze, 25 Minuten. Sie bleiben hell, dürfen nicht braun werden.', timer: 1500, ingredientIdxs: [] },
+      { title: 'Glasieren', content: 'Schokolade im Wasserbad schmelzen, Lebkuchen damit überziehen. Trocknen lassen.', timer: null, ingredientIdxs: [8] },
+      { title: 'Reifung', content: 'In luftdichter Dose 1 Tag durchziehen lassen — werden noch saftiger.', timer: null, ingredientIdxs: [] },
+    ],
+  },
+  {
+    id: 'striezel',
+    name: 'Hefe-Osterhase',
+    tag: 'Saison · April',
+    emoji: '🐇',
+    totalTime: '2,5 Std',
+    activeTime: '~25 Min',
+    ingredients: [
+      { name: 'Weizenmehl Type 405', amount: 400, unit: 'g' },
+      { name: 'Hefe (frisch)', amount: 20, unit: 'g' },
+      { name: 'Vollmilch (warm)', amount: 180, unit: 'ml' },
+      { name: 'Butter (weich)', amount: 60, unit: 'g' },
+      { name: 'Zucker', amount: 50, unit: 'g' },
+      { name: 'Salz', amount: 6, unit: 'g' },
+      { name: 'Ei', amount: 1, unit: 'Stk' },
+      { name: 'Rosinen (für Augen)', amount: 6, unit: 'Stk' },
+      { name: 'Ei (zum Bestreichen)', amount: 1, unit: 'Stk' },
+    ],
+    steps: [
+      { title: 'Hefemilch', content: 'Hefe in warmer Milch auflösen, 5 Min stehen lassen.', timer: 300, ingredientIdxs: [1, 2] },
+      { title: 'Teig', content: 'Mehl, Zucker, Salz, Butter, Ei und Hefemilch 8 Min kneten bis der Teig glatt und elastisch ist.', timer: 480, ingredientIdxs: [0, 3, 4, 5, 6] },
+      { title: 'Gehen lassen', content: '60 Minuten warm gehen lassen bis sich der Teig verdoppelt hat.', timer: 3600, ingredientIdxs: [] },
+      { title: 'Hasen formen', content: 'Teig in 3 Stücke teilen. Pro Hase: ovaler Körper, 2 längliche Ohren oben, ein kleiner runder Schwanz. Rosinen als Augen eindrücken.', timer: null, ingredientIdxs: [7] },
+      { title: 'Stückgare', content: '20 Minuten gehen lassen.', timer: 1200, ingredientIdxs: [] },
+      { title: 'Backen', content: 'Mit verquirltem Ei bestreichen. 180°C, 20–25 Min goldgelb backen.', timer: 1500, ingredientIdxs: [8] },
+    ],
+  },
 ];
 
 // ═══════════════════════════════════════════════════════
@@ -5824,6 +6093,7 @@ function renderHome() {
   const filtered = RECIPES.filter(recipeMatchesFilter);
   if (filtered.length === 0) {
     list.innerHTML = '<div style="color:var(--muted);text-align:center;padding:24px 0;font-size:14px;">Keine Rezepte für diesen Filter.</div>';
+    renderSeasonBanner();
     return;
   }
   list.innerHTML = filtered.map(r => `
@@ -5843,6 +6113,37 @@ function renderHome() {
       </div>
     </div>
   `).join('');
+  // P2.5: Saison-Highlights
+  try {
+    const seasonRecipes = getCurrentSeason().recipes;
+    seasonRecipes.forEach(rid => {
+      const card = document.querySelector(`.recipe-card[onclick*="'${rid}'"]`);
+      if (card) card.classList.add('season-highlight');
+    });
+  } catch (e) {}
+  renderSeasonBanner();
+}
+
+// P2.5: Saison-Banner rendern
+function renderSeasonBanner() {
+  const el = document.getElementById('seasonBanner');
+  if (!el) return;
+  const season = getCurrentSeason();
+  const validRecipes = season.recipes.filter(rid => RECIPES.find(r => r.id === rid));
+  if (validRecipes.length === 0) { el.style.display = 'none'; return; }
+  const firstId = validRecipes[0];
+  const recipe = RECIPES.find(r => r.id === firstId);
+  if (!recipe) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="season-banner-row" onclick="(function(){ activeFilter='saison'; document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active')); renderHome(); })();">
+      <div class="season-banner-emoji">${season.emoji}</div>
+      <div class="season-banner-text">
+        <div class="season-banner-title">${esc(season.name)} — Saison-Rezepte</div>
+        <div class="season-banner-sub">Tipp: ${esc(recipe.name)} ist gerade perfekt</div>
+      </div>
+      <div class="season-banner-arrow">→</div>
+    </div>`;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -5937,11 +6238,17 @@ function renderAllergenBadges() {
   if (!el) return;
   const allergens = RECIPE_ALLERGENS[currentRecipe.id] || [];
   const labels = { gluten: '🌾 Gluten', laktose: '🥛 Laktose', nuesse: '🥜 Nüsse', ei: '🥚 Ei', sesam: '🫘 Sesam' };
+  let html = '';
   if (allergens.length === 0) {
-    el.innerHTML = '<span class="allergen-badge none">✓ Keine Hauptallergene</span>';
+    html = '<span class="allergen-badge none">✓ Keine Hauptallergene</span>';
   } else {
-    el.innerHTML = allergens.map(a => `<span class="allergen-badge">${labels[a] || esc(a)}</span>`).join('');
+    html = allergens.map(a => `<span class="allergen-badge">${labels[a] || esc(a)}</span>`).join('');
   }
+  // P2.3: Vegan-Badge wenn Rezept vegan ist
+  if (RECIPE_VEGAN[currentRecipe.id]) {
+    html += '<span class="allergen-badge none">🌱 Vegan</span>';
+  }
+  el.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -6785,6 +7092,16 @@ const RECIPE_TAGS = {
   'berliner-landbrot': ['sauerteig', 'vollkorn', 'regional'],
   'tiroler-bauernbrot': ['sauerteig', 'regional'],
   'allgaeuer-milchbrot': ['hefe', 'regional'],
+  // P2.1: Glutenfreie Rezepte
+  'buchweizen-gf':    ['hefe', 'glutenfrei'],
+  'maishirse-gf':     ['hefe', 'glutenfrei', 'schnell'],
+  'mandelkokos-gf':   ['glutenfrei', 'schnell', 'lowcarb'],
+  'reissauerteig-gf': ['sauerteig', 'glutenfrei'],
+  // P2.2: Saisonrezepte
+  'stollen':          ['hefe', 'saison'],
+  'osterzopf':        ['hefe', 'saison'],
+  'lebkuchen':        ['saison'],
+  'striezel':         ['hefe', 'saison', 'schnell'],
 };
 
 // N2: RECIPE_ALLERGENS
@@ -6815,7 +7132,40 @@ const RECIPE_ALLERGENS = {
   'berliner-landbrot': ['gluten'],
   'tiroler-bauernbrot': ['gluten', 'laktose'],
   'allgaeuer-milchbrot': ['gluten', 'laktose', 'ei'],
+  // P2.1: Glutenfreie Rezepte
+  'buchweizen-gf':    [],
+  'maishirse-gf':     [],
+  'mandelkokos-gf':   ['ei'],
+  'reissauerteig-gf': [],
+  // P2.2: Saisonrezepte
+  'stollen':          ['gluten', 'laktose', 'nuesse'],
+  'osterzopf':        ['gluten', 'laktose', 'ei'],
+  'lebkuchen':        ['ei', 'nuesse'],
+  'striezel':         ['gluten', 'laktose', 'ei'],
 };
+
+// P2.3: VEGAN-MAPPING (true = vegan, keine Eier/Milch/Butter/Honig)
+const RECIPE_VEGAN = {
+  starter: true, sauerteig: true, bauernbrot: true, baguette: true, ciabatta: true,
+  dinkelbrot: true, focaccia: true, vollkornbrot: true, zopfbrot: false, brioche: false,
+  brezel: true, roggenbroetchen: true, joghurtbrot: false, koernerbrot: true,
+  weissbrot: true, sesambroetchen: true, kurbiskernbrot: true, karottenbrot: true,
+  nussbrot: true, roggenmischbrot: true, pumpernickel: true,
+  schwarzwaelder: true, frankenlaib: true, 'berliner-landbrot': true,
+  'tiroler-bauernbrot': false, 'allgaeuer-milchbrot': false,
+  'buchweizen-gf': true, 'maishirse-gf': true, 'mandelkokos-gf': false, 'reissauerteig-gf': true,
+  stollen: false, osterzopf: false, lebkuchen: false, striezel: false,
+};
+
+// P2.5: SAISONALE EMPFEHLUNGEN
+function getCurrentSeason() {
+  const m = new Date().getMonth(); // 0=Jan, 11=Dez
+  if (m === 11 || m === 0) return { id: 'winter', name: 'Winter', emoji: '❄️', recipes: ['stollen', 'lebkuchen'] };
+  if (m >= 1 && m <= 3) return { id: 'fruehling', name: 'Frühling', emoji: '🌷', recipes: ['osterzopf', 'striezel'] };
+  if (m >= 4 && m <= 6) return { id: 'sommer', name: 'Sommer', emoji: '☀️', recipes: ['focaccia', 'baguette'] };
+  if (m >= 7 && m <= 8) return { id: 'spaetsommer', name: 'Spätsommer', emoji: '🌾', recipes: ['vollkornbrot', 'karottenbrot'] };
+  return { id: 'herbst', name: 'Herbst', emoji: '🍂', recipes: ['kurbiskernbrot', 'nussbrot'] };
+}
 
 let activeFilter = 'all';
 let activeAllergenFilter = null; // z.B. 'glutenfrei', 'laktosefrei', etc.
@@ -6845,22 +7195,28 @@ function recipeMatchesFilter(recipe) {
     const tags = RECIPE_TAGS[recipe.id] || [];
     if (activeFilter === 'regional') {
       if (!tags.includes('regional')) return false;
+    } else if (activeFilter === 'saison') {
+      if (!tags.includes('saison')) return false;
     } else {
       if (!tags.includes(activeFilter)) return false;
     }
   }
-  // Allergen-Filter
+  // Allergen/Diät-Filter
   if (activeAllergenFilter) {
-    const allergens = RECIPE_ALLERGENS[recipe.id] || [];
-    const filterMap = {
-      'glutenfrei': 'gluten',
-      'laktosefrei': 'laktose',
-      'nussfrei': 'nuesse',
-      'eifrei': 'ei',
-      'sesamfrei': 'sesam',
-    };
-    const avoid = filterMap[activeAllergenFilter];
-    if (avoid && allergens.includes(avoid)) return false;
+    if (activeAllergenFilter === 'vegan') {
+      if (!RECIPE_VEGAN[recipe.id]) return false;
+    } else {
+      const allergens = RECIPE_ALLERGENS[recipe.id] || [];
+      const filterMap = {
+        'glutenfrei': 'gluten',
+        'laktosefrei': 'laktose',
+        'nussfrei': 'nuesse',
+        'eifrei': 'ei',
+        'sesamfrei': 'sesam',
+      };
+      const avoid = filterMap[activeAllergenFilter];
+      if (avoid && allergens.includes(avoid)) return false;
+    }
   }
   return true;
 }
@@ -8710,6 +9066,9 @@ function openNewBean() {
   renderNoteTags();
   renderKStars();
   showKaffeeScreen('k-journal-entry');
+  // P2.NEU: Methoden-Empfehlungen
+  setupBeanRecommendationListeners();
+  renderBeanRecommendations(getCurrentBeanFormData());
 }
 
 function editBean(id) {
@@ -8729,6 +9088,97 @@ function editBean(id) {
   renderNoteTags();
   renderKStars();
   showKaffeeScreen('k-journal-entry');
+  // P2.NEU: Methoden-Empfehlungen
+  setupBeanRecommendationListeners();
+  renderBeanRecommendations(getCurrentBeanFormData());
+}
+
+// P2.NEU: Bohnen → Brühmethoden-Empfehlung basierend auf Röstgrad und Herkunft
+function recommendBrewMethod(bean) {
+  if (!bean) return [];
+  const roast = (bean.roast || '').toLowerCase();
+  const origin = (bean.origin || '').toLowerCase();
+  const score = {};
+
+  // Heller Röstgrad → Pour-Over, Chemex, AeroPress (Klarheit)
+  if (roast === 'light' || roast === 'helle' || roast === 'hell') {
+    score['pourover']  = (score['pourover']  || 0) + 3;
+    score['chemex']    = (score['chemex']    || 0) + 3;
+    score['aeropress'] = (score['aeropress'] || 0) + 2;
+  }
+  // Mittlere Röstung → vielseitig
+  if (roast === 'medium' || roast === 'mittel') {
+    score['pourover']    = (score['pourover']    || 0) + 2;
+    score['frenchpress'] = (score['frenchpress'] || 0) + 2;
+    score['aeropress']   = (score['aeropress']   || 0) + 2;
+    score['mokapot']     = (score['mokapot']     || 0) + 2;
+  }
+  // Dunkle Röstung → Espresso, Moka, French Press (Körper)
+  if (roast === 'dark' || roast === 'dunkel') {
+    score['espresso']    = (score['espresso']    || 0) + 3;
+    score['mokapot']     = (score['mokapot']     || 0) + 3;
+    score['frenchpress'] = (score['frenchpress'] || 0) + 2;
+    score['tuerkisch']   = (score['tuerkisch']   || 0) + 2;
+  }
+
+  // Herkunft-spezifisch
+  if (origin.includes('äthiop') || origin.includes('ethio') || origin.includes('kenia') || origin.includes('kenya')) {
+    score['pourover'] = (score['pourover'] || 0) + 2;
+    score['chemex']   = (score['chemex']   || 0) + 2;
+  }
+  if (origin.includes('brasil') || origin.includes('kolumb') || origin.includes('honduras')) {
+    score['frenchpress'] = (score['frenchpress'] || 0) + 1;
+    score['aeropress']   = (score['aeropress']   || 0) + 1;
+  }
+  if (origin.includes('indonesien') || origin.includes('sumatra') || origin.includes('java')) {
+    score['frenchpress'] = (score['frenchpress'] || 0) + 2;
+    score['mokapot']     = (score['mokapot']     || 0) + 2;
+  }
+  if (origin.includes('jemen') || origin.includes('yemen') || origin.includes('türk')) {
+    score['tuerkisch'] = (score['tuerkisch'] || 0) + 3;
+  }
+
+  const sorted = Object.entries(score).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  return sorted.map(([id, val]) => {
+    const m = (typeof BREW_METHODS !== 'undefined') ? BREW_METHODS.find(bm => bm.id === id) : null;
+    return { id, name: m ? m.name : id, score: val };
+  });
+}
+
+function renderBeanRecommendations(bean) {
+  const el = document.getElementById('beanRecommendations');
+  if (!el) return;
+  const recs = recommendBrewMethod(bean);
+  if (recs.length === 0) {
+    el.innerHTML = '<div class="bean-rec-label">💡 Methoden-Empfehlung</div><div style="font-size:12px;color:var(--muted);">Wähle Röstgrad und/oder Herkunft, um Empfehlungen zu sehen.</div>';
+    return;
+  }
+  el.innerHTML = `
+    <div class="bean-rec-label">💡 Methoden-Empfehlung</div>
+    <div class="bean-rec-list">
+      ${recs.map((r, i) => `<button type="button" class="bean-rec-chip ${i === 0 ? 'top' : ''}" onclick="openMethod('${esc(r.id)}')">${i === 0 ? '⭐ ' : ''}${esc(r.name)}</button>`).join('')}
+    </div>`;
+}
+
+function getCurrentBeanFormData() {
+  return {
+    name:    document.getElementById('k-bean-name')    ? document.getElementById('k-bean-name').value    : '',
+    roaster: document.getElementById('k-bean-roaster') ? document.getElementById('k-bean-roaster').value : '',
+    origin:  document.getElementById('k-bean-origin')  ? document.getElementById('k-bean-origin').value  : '',
+    roast:   document.getElementById('k-bean-roast')   ? document.getElementById('k-bean-roast').value   : '',
+    method:  document.getElementById('k-bean-method')  ? document.getElementById('k-bean-method').value  : '',
+  };
+}
+
+function setupBeanRecommendationListeners() {
+  ['k-bean-name', 'k-bean-roaster', 'k-bean-origin', 'k-bean-roast'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.recListener) {
+      el.dataset.recListener = '1';
+      el.addEventListener('input', () => renderBeanRecommendations(getCurrentBeanFormData()));
+      el.addEventListener('change', () => renderBeanRecommendations(getCurrentBeanFormData()));
+    }
+  });
 }
 
 function deleteBean(id) {
