@@ -5716,7 +5716,14 @@ function requestNotificationPermission() {
 function sendNotification(title, body) {
   if (!notificationPermission) return;
   try {
-    new Notification(title, { body, icon: '🍞', tag: 'brot-timer' });
+    // P4.1: Inline-SVG-Icon statt Emoji (Icon-URL erwartet)
+    const icon = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text y="48" font-size="48">🍞</text></svg>');
+    new Notification(title, {
+      body,
+      icon,
+      tag: 'brot-timer-' + (currentRecipe ? currentRecipe.id : 'global'),
+      requireInteraction: true,
+    });
   } catch(e) {}
 }
 
@@ -5909,22 +5916,57 @@ function toggleNotes() {
 // ═══════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════
 // WAKE LOCK — Screen bleibt beim Backen an
+// P4.2: Mit Fallback für ältere Geräte (NoSleep-Style Audio-Loop)
 // ═══════════════════════════════════════════════════════
+let _noSleepAudio = null;
+let _noSleepActive = false;
+
+function _startNoSleepFallback() {
+  if (_noSleepActive) return;
+  try {
+    if (!_noSleepAudio) {
+      // Stilles 1-Sekunden-WAV-Sample, base64 — hält iOS/Android-Browser wach
+      _noSleepAudio = document.createElement('audio');
+      _noSleepAudio.setAttribute('loop', 'loop');
+      _noSleepAudio.setAttribute('playsinline', 'playsinline');
+      _noSleepAudio.muted = true;
+      _noSleepAudio.volume = 0;
+      _noSleepAudio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQwAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAASDs90hvAAAAAAAAAAAAAAAAAAAA//sQwAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQwCmDwAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQwFODwAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQwH2DwAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQwKeDwAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQwNGDwAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQwPuDwAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
+      document.body.appendChild(_noSleepAudio);
+    }
+    _noSleepAudio.play().then(() => { _noSleepActive = true; }).catch(() => {});
+  } catch(e) {}
+}
+
+function _stopNoSleepFallback() {
+  if (!_noSleepActive || !_noSleepAudio) return;
+  try { _noSleepAudio.pause(); } catch(e) {}
+  _noSleepActive = false;
+}
+
 async function acquireWakeLock() {
   if (window.Capacitor?.Plugins?.KeepAwake) {
-    try { await window.Capacitor.Plugins.KeepAwake.keepAwake(); } catch(e) {}
-  } else if ('wakeLock' in navigator) {
-    try { wakeLockRef = await navigator.wakeLock.request('screen'); } catch(e) {}
+    try { await window.Capacitor.Plugins.KeepAwake.keepAwake(); return; } catch(e) {}
   }
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLockRef = await navigator.wakeLock.request('screen');
+      return;
+    } catch(e) {}
+  }
+  // P4.2: Fallback — silent audio loop hält Bildschirm aktiv
+  _startNoSleepFallback();
 }
 
 async function releaseWakeLock() {
   if (window.Capacitor?.Plugins?.KeepAwake) {
     try { await window.Capacitor.Plugins.KeepAwake.allowSleep(); } catch(e) {}
-  } else if (wakeLockRef) {
+  }
+  if (wakeLockRef) {
     wakeLockRef.release().catch(() => {});
     wakeLockRef = null;
   }
+  _stopNoSleepFallback();
 }
 
 function doHaptic() {
@@ -6736,14 +6778,21 @@ function toggleTimer() {
     saveTimerState();
 
     if (window.Capacitor?.Plugins?.LocalNotifications) {
+      // P4.1: Eindeutige ID pro Rezept+Schritt damit parallele Timer nicht kollidieren
+      const notifId = currentRecipe ? Math.abs(currentRecipe.id.split('').reduce((a,c) => a + c.charCodeAt(0), 0) * 100 + currentStep) : 1;
+      const stepTitle = currentRecipe?.steps?.[currentStep]?.title || 'Schritt';
       window.Capacitor.Plugins.LocalNotifications.schedule({
         notifications: [{
-          title: "Brot & Zeit",
-          body: "⏰ Dein Brotteig braucht Aufmerksamkeit!",
-          id: 1,
-          schedule: { at: new Date(Date.now() + timerSeconds * 1000) }
+          title: '🍞 ' + (currentRecipe?.name || 'Brot & Zeit'),
+          body: '⏰ Timer fertig: ' + stepTitle,
+          id: notifId,
+          schedule: { at: new Date(Date.now() + timerSeconds * 1000) },
+          sound: null,
+          smallIcon: 'ic_stat_icon_config_sample',
         }]
-      });
+      }).catch(() => {});
+      // Speicher die ID damit stopTimer sie cancelln kann
+      window._activeNotifId = notifId;
     }
 
     timerInterval = setInterval(() => {
@@ -6762,7 +6811,9 @@ function toggleTimer() {
 
 function stopTimer() {
   if (window.Capacitor?.Plugins?.LocalNotifications) {
-    window.Capacitor.Plugins.LocalNotifications.cancel({ notifications: [{ id: 1 }] });
+    const id = window._activeNotifId || 1;
+    window.Capacitor.Plugins.LocalNotifications.cancel({ notifications: [{ id }] }).catch(() => {});
+    window._activeNotifId = null;
   }
   clearInterval(timerInterval);
   timerInterval = null;
