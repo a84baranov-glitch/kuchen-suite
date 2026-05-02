@@ -3210,6 +3210,72 @@
     min-height: 44px;
   }
   .bean-rec-chip.top { background: var(--k-warm, #E07B39); color: white; border-color: var(--k-warm, #E07B39); font-weight: 600; }
+
+/* P3.1: MULTI-RESUME-BANNER */
+.resume-banner-multi { padding: 0; margin: 0 20px 16px; }
+.resume-banner-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; padding: 0 4px; font-weight: 600; }
+.resume-banner-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; background: linear-gradient(135deg, var(--surface), white);
+  border-radius: 14px; margin-bottom: 8px;
+  border-left: 4px solid var(--warm);
+  cursor: pointer; transition: transform 0.15s;
+  position: relative;
+}
+.resume-banner-item:active { transform: scale(0.98); }
+.resume-banner-item .resume-icon { font-size: 28px; flex-shrink: 0; }
+.resume-banner-item .resume-text { flex: 1; min-width: 0; }
+.resume-banner-item .resume-title { font-size: 14px; font-weight: 600; color: var(--dark); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.resume-banner-item .resume-detail { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.resume-remove {
+  background: none; border: none; color: var(--muted);
+  font-size: 20px; cursor: pointer; padding: 4px 8px;
+  min-width: 44px; min-height: 44px;
+}
+.resume-remove:hover { color: #D32F2F; }
+.resume-more { font-size: 12px; color: var(--muted); padding: 4px 8px; text-align: center; }
+
+/* P3.2: STRUKTURIERTER REZEPT-EDITOR */
+.cr-input {
+  width: 100%; padding: 12px 14px; margin-bottom: 10px;
+  border: 1px solid rgba(0,0,0,0.12); border-radius: 12px;
+  font-size: 14px; font-family: system-ui, -apple-system, sans-serif;
+  background: var(--surface);
+  min-height: 44px; box-sizing: border-box;
+}
+.cr-input:focus { outline: 2px solid var(--warm); outline-offset: -1px; }
+.cr-section-label { font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; font-weight: 600; }
+.cr-ing-row, .cr-step-row {
+  display: flex; gap: 8px; margin-bottom: 8px; align-items: stretch;
+  background: var(--surface); padding: 10px; border-radius: 12px;
+}
+.cr-ing-row .cr-input, .cr-step-row .cr-input { margin-bottom: 0; }
+.cr-ing-name { flex: 2; }
+.cr-ing-amt { flex: 1; }
+.cr-ing-unit { flex: 1; }
+.cr-step-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.cr-step-fields .cr-input { margin-bottom: 0; }
+.cr-step-timer-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.cr-step-timer-row label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.cr-step-timer-input { width: 70px; flex: 0 0 auto; }
+.cr-row-remove {
+  background: rgba(211,47,47,0.1); color: #D32F2F;
+  border: none; border-radius: 10px;
+  width: 44px; min-height: 44px; cursor: pointer;
+  font-size: 18px; flex-shrink: 0;
+}
+.cr-add-btn {
+  width: 100%; padding: 12px; background: rgba(196,113,42,0.08);
+  border: 1px dashed var(--warm); border-radius: 12px;
+  color: var(--warm); font-weight: 500; font-size: 14px;
+  cursor: pointer; margin-bottom: 8px;
+  font-family: system-ui, -apple-system, sans-serif;
+  min-height: 44px;
+}
+.cr-actions { display: flex; gap: 10px; margin-top: 20px; }
+.cr-cancel, .cr-save { flex: 1; padding: 14px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; min-height: 48px; font-family: system-ui, -apple-system, sans-serif; font-size: 14px; }
+.cr-cancel { background: rgba(0,0,0,0.06); color: var(--dark); }
+.cr-save { background: var(--warm); color: white; }
 </style>
 </head>
 <body data-world="brot">
@@ -3675,23 +3741,29 @@
   </div>
 </div>
 
-<!-- F-22: EIGENES REZEPT OVERLAY -->
+<!-- P3.2: EIGENES REZEPT OVERLAY (strukturierter Editor) -->
 <div class="custom-recipe-overlay" id="customRecipeOverlay" onclick="closeCustomRecipe()">
-  <div class="custom-recipe-box" onclick="event.stopPropagation()">
+  <div class="custom-recipe-box" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto;">
     <div class="glossar-handle"></div>
     <div class="custom-recipe-title">✍️ Eigenes Rezept</div>
-    <span class="custom-field-label">Name des Rezepts *</span>
-    <input type="text" class="custom-field" id="cr-name" placeholder="z.B. Omas Weizenbrot">
-    <span class="custom-field-label">Tag / Kategorie</span>
-    <input type="text" class="custom-field" id="cr-tag" placeholder="z.B. Hefe · Familienrezept">
-    <span class="custom-field-label">Gesamtzeit</span>
-    <input type="text" class="custom-field" id="cr-time" placeholder="z.B. 3–4 Stunden">
-    <span class="custom-field-label">Zutaten (eine pro Zeile: Menge Einheit Name)</span>
-    <textarea class="custom-field textarea" id="cr-ingredients" placeholder="500 g Weizenmehl&#10;350 ml Wasser&#10;10 g Salz&#10;7 g Trockenhefe"></textarea>
-    <span class="custom-field-label">Schritte (einen pro Zeile: Titel | Beschreibung | Timer-Minuten)</span>
-    <textarea class="custom-field textarea" id="cr-steps" placeholder="Teig machen | Alle Zutaten vermischen und 8 Minuten kneten. | 0&#10;Erste Gare | Abgedeckt 1 Stunde gehen lassen. | 60&#10;Backen | Bei 220°C 35 Minuten backen. | 35"></textarea>
-    <button class="custom-save-btn" onclick="saveCustomRecipe()">Rezept speichern</button>
-    <button class="custom-cancel-btn" onclick="closeCustomRecipe()">Abbrechen</button>
+
+    <input class="cr-input" id="cr-name" placeholder="Rezeptname (z.B. Mein Lieblingsbrot)" maxlength="60">
+    <input class="cr-input" id="cr-tag" placeholder="Tag (z.B. Mein Klassiker)" maxlength="40">
+    <input class="cr-input" id="cr-emoji" placeholder="Emoji (optional, z.B. 🍞)" maxlength="4">
+    <input class="cr-input" id="cr-time" placeholder="Gesamtzeit (z.B. 4 Std)" maxlength="20">
+
+    <div class="cr-section-label">Zutaten</div>
+    <div id="cr-ingredients-list"></div>
+    <button class="cr-add-btn" onclick="addCustomIngredient()">+ Zutat hinzufügen</button>
+
+    <div class="cr-section-label">Schritte</div>
+    <div id="cr-steps-list"></div>
+    <button class="cr-add-btn" onclick="addCustomStep()">+ Schritt hinzufügen</button>
+
+    <div class="cr-actions">
+      <button class="cr-cancel" onclick="closeCustomRecipe()">Abbrechen</button>
+      <button class="cr-save" onclick="saveCustomRecipe()">Speichern</button>
+    </div>
   </div>
 </div>
 
@@ -3703,7 +3775,8 @@
     <div class="share-sub">Lass Freunde und Familie mitbacken!</div>
     <div class="share-btns">
       <button class="share-btn share-btn-primary" onclick="shareNative()">↗ Teilen (System)</button>
-      <button class="share-btn" onclick="copyShareLink()">📋 Link kopieren</button>
+      <button class="share-btn" onclick="copyShareLink()">📋 Rezept + Link kopieren</button>
+      <button class="share-btn" onclick="copyShareUrlOnly()">🔗 Nur Link kopieren</button>
       <button class="share-btn" onclick="closeShare()" style="margin-top:6px;opacity:0.6;">Schließen</button>
     </div>
   </div>
@@ -5650,74 +5723,156 @@ function sendNotification(title, body) {
 // ═══════════════════════════════════════════════════════
 // localStorage — SAVE & RESTORE PROGRESS
 // ═══════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════
+// P3.1: MULTI-RECIPE COOKING-STATE
+// Speichert mehrere parallel laufende Rezepte
+// Storage-Format: brot-progress-active = {recipeId1: {step, timestamp}, recipeId2: ...}
+// Max 5 parallel, älteste werden bei Überlauf entfernt
+// ═══════════════════════════════════════════════════════
+const MAX_ACTIVE_RECIPES = 5;
+const ACTIVE_TTL_MS = 14 * 24 * 60 * 60 * 1000; // 14 Tage (P1.5)
+
+function getActiveRecipes() {
+  try {
+    // Migration: altes Single-Format → Multi-Format
+    const oldRaw = localStorage.getItem('brot-progress');
+    if (oldRaw) {
+      try {
+        const old = JSON.parse(oldRaw);
+        if (old && old.recipeId) {
+          const map = { [old.recipeId]: { step: old.step || 0, timestamp: old.timestamp || Date.now() } };
+          safeSetItem('brot-progress-active', JSON.stringify(map));
+        }
+      } catch(e) {}
+      localStorage.removeItem('brot-progress');
+    }
+    const raw = localStorage.getItem('brot-progress-active');
+    if (!raw) return {};
+    const data = JSON.parse(raw);
+    if (typeof data !== 'object' || data === null) return {};
+    // Expired entries entfernen
+    const now = Date.now();
+    let dirty = false;
+    Object.keys(data).forEach(id => {
+      if (now - (data[id].timestamp || 0) > ACTIVE_TTL_MS) {
+        delete data[id];
+        dirty = true;
+      }
+    });
+    if (dirty) safeSetItem('brot-progress-active', JSON.stringify(data));
+    return data;
+  } catch(e) { return {}; }
+}
+
+function setActiveRecipe(recipeId, state) {
+  if (!recipeId || !state) return;
+  const all = getActiveRecipes();
+  all[recipeId] = { step: state.step || 0, timestamp: Date.now() };
+  // Limit erzwingen: älteste entfernen wenn > MAX
+  const ids = Object.keys(all);
+  if (ids.length > MAX_ACTIVE_RECIPES) {
+    const sorted = ids.sort((a, b) => (all[a].timestamp || 0) - (all[b].timestamp || 0));
+    while (Object.keys(all).length > MAX_ACTIVE_RECIPES) {
+      delete all[sorted.shift()];
+    }
+  }
+  safeSetItem('brot-progress-active', JSON.stringify(all));
+}
+
+function removeActiveRecipe(recipeId) {
+  if (!recipeId) return;
+  const all = getActiveRecipes();
+  delete all[recipeId];
+  safeSetItem('brot-progress-active', JSON.stringify(all));
+}
+
+function getActiveRecipesList() {
+  const all = getActiveRecipes();
+  return Object.entries(all)
+    .map(([id, st]) => ({ recipeId: id, step: st.step || 0, timestamp: st.timestamp || 0 }))
+    .sort((a, b) => b.timestamp - a.timestamp); // neueste zuerst
+}
+
 function saveProgress() {
   if (!currentRecipe) return;
-  const data = {
-    recipeId: currentRecipe.id,
-    step: currentStep,
-    scale: scale,
-    timestamp: Date.now()
-  };
-  try { localStorage.setItem('brot-progress', JSON.stringify(data)); } catch(e) {}
+  setActiveRecipe(currentRecipe.id, { step: currentStep });
 }
 
 function clearProgress() {
-  try { localStorage.removeItem('brot-progress'); } catch(e) {}
+  if (currentRecipe) removeActiveRecipe(currentRecipe.id);
 }
 
 function getSavedProgress() {
-  try {
-    const raw = localStorage.getItem('brot-progress');
-    if (!raw) return null;
-    const data = JSON.parse(raw);
-    // Expire after 7 days (Sauerteig dauert 2 Tage)
-    if (Date.now() - data.timestamp > 14 * 24 * 60 * 60 * 1000) {
-      clearProgress();
-      return null;
+  // Behält Rückwärtskompatibilität: liefert das aktuelle Rezept ODER das neueste
+  if (currentRecipe) {
+    const all = getActiveRecipes();
+    if (all[currentRecipe.id]) {
+      return { recipeId: currentRecipe.id, step: all[currentRecipe.id].step, timestamp: all[currentRecipe.id].timestamp };
     }
-    return data;
-  } catch(e) { return null; }
+  }
+  const list = getActiveRecipesList();
+  return list[0] || null;
 }
 
 function renderResumeBanner() {
   const banner = document.getElementById('resumeBanner');
-  const saved = getSavedProgress();
-  if (!saved) {
-    banner.innerHTML = '';
-    return;
-  }
-  const recipe = RECIPES.find(r => r.id === saved.recipeId);
-  if (!recipe) {
-    clearProgress();
-    banner.innerHTML = '';
-    return;
-  }
-  const step = recipe.steps[saved.step];
-  banner.innerHTML = `
-    <div class="resume-banner" onclick="resumeCooking()">
-      <div class="resume-icon">${recipe.emoji}</div>
-      <div class="resume-text">
-        <div class="resume-title">Weiterbacken</div>
-        <div class="resume-detail">${esc(recipe.name)} — Schritt ${saved.step + 1}: ${step ? esc(step.title) : ''}</div>
-      </div>
-      <div class="resume-arrow">→</div>
-    </div>
-  `;
+  if (!banner) return;
+  const list = getActiveRecipesList();
+  if (list.length === 0) { banner.innerHTML = ''; return; }
+  // Max 3 anzeigen
+  const visible = list.slice(0, 3);
+  const html = '<div class="resume-banner-multi">' +
+    '<div class="resume-banner-label">⏱ Aktive Rezepte</div>' +
+    visible.map(item => {
+      const recipe = RECIPES.find(r => r.id === item.recipeId);
+      if (!recipe) return '';
+      const step = recipe.steps[item.step];
+      const stepTitle = step ? esc(step.title) : '';
+      const totalSteps = recipe.steps.length;
+      const ageHours = Math.round((Date.now() - item.timestamp) / (60 * 60 * 1000));
+      const ageStr = ageHours < 1 ? 'gerade eben' : (ageHours < 24 ? 'vor ' + ageHours + 'h' : 'vor ' + Math.round(ageHours / 24) + 'd');
+      return `<div class="resume-banner-item" onclick="resumeRecipe('${esc(item.recipeId)}')">
+        <div class="resume-icon">${esc(recipe.emoji)}</div>
+        <div class="resume-text">
+          <div class="resume-title">${esc(recipe.name)}</div>
+          <div class="resume-detail">Schritt ${item.step + 1}/${totalSteps}${stepTitle ? ': ' + stepTitle : ''} · ${ageStr}</div>
+        </div>
+        <button class="resume-remove" onclick="event.stopPropagation(); deleteActiveRecipe('${esc(item.recipeId)}')" aria-label="Entfernen">×</button>
+      </div>`;
+    }).join('') +
+    (list.length > 3 ? '<div class="resume-more">+ ' + (list.length - 3) + ' weitere</div>' : '') +
+    '</div>';
+  banner.innerHTML = html;
 }
 
-function resumeCooking() {
-  const saved = getSavedProgress();
-  if (!saved) return;
-  const recipe = RECIPES.find(r => r.id === saved.recipeId);
+function resumeRecipe(recipeId) {
+  const recipe = RECIPES.find(r => r.id === recipeId);
   if (!recipe) return;
   currentRecipe = recipe;
-  scale = saved.scale || 1;
-  currentStep = saved.step;
+  scale = 1;
+  const all = getActiveRecipes();
+  currentStep = (all[recipeId] && all[recipeId].step) || 0;
   stopTimer();
-  document.getElementById('c-recipe-name').textContent = currentRecipe.name;
+  try { stepRoles = JSON.parse(localStorage.getItem('brot-roles-' + recipe.id) || '{}'); } catch(e) { stepRoles = {}; }
+  document.getElementById('c-recipe-name').textContent = recipe.name;
   buildOverview();
   renderStep();
   showScreen('cooking');
+  acquireWakeLock();
+  try { history.pushState({ inCooking: true, recipeId: recipe.id }, '', '#cooking-' + recipe.id); } catch(e) {}
+}
+
+function deleteActiveRecipe(recipeId) {
+  removeActiveRecipe(recipeId);
+  renderResumeBanner();
+  showToast('Rezept aus aktiver Liste entfernt');
+}
+
+function resumeCooking() {
+  // Backwards-compatibility: ruft resumeRecipe für das neueste Rezept auf
+  const list = getActiveRecipesList();
+  if (list.length > 0) resumeRecipe(list[0].recipeId);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -6255,24 +6410,8 @@ function renderAllergenBadges() {
 // COOKING
 // ═══════════════════════════════════════════════════════
 function startCooking() {
-  // F-10: Warnen wenn ein anderes Rezept bereits in Progress ist
-  const saved = getSavedProgress();
-  if (saved && saved.recipeId !== currentRecipe.id) {
-    const savedRecipe = RECIPES.find(r => r.id === saved.recipeId);
-    const recipeName = savedRecipe ? savedRecipe.name : 'unbekanntes Rezept';
-    document.getElementById('confirmTitle').textContent = 'Anderes Rezept läuft noch';
-    document.getElementById('confirmSub').textContent = `„${recipeName}" ist noch auf Schritt ${saved.step + 1}. Neues Rezept starten und alten Fortschritt löschen?`;
-    document.getElementById('confirmOk').textContent = 'Neu starten';
-    document.getElementById('confirmCancel').textContent = 'Abbrechen';
-    confirmAction = () => {
-      document.getElementById('confirmOk').textContent = 'Ja, zurück';
-      document.getElementById('confirmCancel').textContent = 'Weiterbacken';
-      _doStartCooking();
-    };
-    document.getElementById('confirmOverlay').classList.add('active');
-  } else {
-    _doStartCooking();
-  }
+  // P3.1: Multi-Recipe — kein Konflikt mehr, einfach starten
+  _doStartCooking();
 }
 
 function _doStartCooking() {
@@ -7271,14 +7410,38 @@ function clearHistory() {
 }
 
 // ═══════════════════════════════════════════════════════
-// F-22: EIGENE REZEPTE
+// P3.2: STRUKTURIERTER REZEPT-EDITOR
 // ═══════════════════════════════════════════════════════
-function openCustomRecipe() {
+let crIngredients = [];
+let crSteps = [];
+
+function openCustomRecipe(existingId) {
   document.getElementById('cr-name').value = '';
   document.getElementById('cr-tag').value = '';
+  if (document.getElementById('cr-emoji')) document.getElementById('cr-emoji').value = '';
   document.getElementById('cr-time').value = '';
-  document.getElementById('cr-ingredients').value = '';
-  document.getElementById('cr-steps').value = '';
+  crIngredients = [];
+  crSteps = [];
+
+  // Falls bestehendes Rezept zum Bearbeiten
+  if (existingId) {
+    const customs = getCustomRecipes();
+    const r = customs.find(x => x.id === existingId);
+    if (r) {
+      document.getElementById('cr-name').value = r.name || '';
+      document.getElementById('cr-tag').value = r.tag || '';
+      if (document.getElementById('cr-emoji')) document.getElementById('cr-emoji').value = r.emoji || '';
+      document.getElementById('cr-time').value = r.totalTime || '';
+      crIngredients = (r.ingredients || []).map(i => ({...i}));
+      crSteps = (r.steps || []).map(s => ({...s}));
+    }
+  }
+
+  if (crIngredients.length === 0) crIngredients.push({ name: '', amount: 0, unit: 'g' });
+  if (crSteps.length === 0) crSteps.push({ title: '', content: '', timer: null });
+
+  renderCustomIngredients();
+  renderCustomSteps();
   document.getElementById('customRecipeOverlay').classList.add('active');
 }
 
@@ -7286,60 +7449,142 @@ function closeCustomRecipe() {
   document.getElementById('customRecipeOverlay').classList.remove('active');
 }
 
+function addCustomIngredient() {
+  crIngredients.push({ name: '', amount: 0, unit: 'g' });
+  renderCustomIngredients();
+}
+
+function removeCustomIngredient(i) {
+  if (crIngredients.length <= 1) return;
+  crIngredients.splice(i, 1);
+  renderCustomIngredients();
+}
+
+function updateCustomIngredient(i, field, val) {
+  if (!crIngredients[i]) return;
+  if (field === 'amount') crIngredients[i].amount = parseFloat(val) || 0;
+  else crIngredients[i][field] = val;
+}
+
+function renderCustomIngredients() {
+  const list = document.getElementById('cr-ingredients-list');
+  if (!list) return;
+  list.innerHTML = crIngredients.map((ing, i) => `
+    <div class="cr-ing-row">
+      <input class="cr-input cr-ing-name" placeholder="Name" maxlength="60" value="${esc(ing.name || '')}" oninput="updateCustomIngredient(${i}, 'name', this.value)">
+      <input class="cr-input cr-ing-amt" type="number" inputmode="decimal" placeholder="Menge" min="0" step="any" value="${ing.amount || ''}" oninput="updateCustomIngredient(${i}, 'amount', this.value)">
+      <input class="cr-input cr-ing-unit" placeholder="g" maxlength="10" value="${esc(ing.unit || '')}" oninput="updateCustomIngredient(${i}, 'unit', this.value)">
+      <button class="cr-row-remove" onclick="removeCustomIngredient(${i})" aria-label="Zutat entfernen">×</button>
+    </div>
+  `).join('');
+}
+
+function addCustomStep() {
+  crSteps.push({ title: '', content: '', timer: null });
+  renderCustomSteps();
+}
+
+function removeCustomStep(i) {
+  if (crSteps.length <= 1) return;
+  crSteps.splice(i, 1);
+  renderCustomSteps();
+}
+
+function updateCustomStep(i, field, val) {
+  if (!crSteps[i]) return;
+  if (field === 'timerMin') {
+    const min = Math.max(0, Math.min(1440, parseInt(val) || 0));
+    crSteps[i].timer = min > 0 ? min * 60 : null;
+  } else {
+    crSteps[i][field] = val;
+  }
+}
+
+function renderCustomSteps() {
+  const list = document.getElementById('cr-steps-list');
+  if (!list) return;
+  list.innerHTML = crSteps.map((step, i) => {
+    const timerMin = step.timer ? Math.round(step.timer / 60) : '';
+    return `
+      <div class="cr-step-row">
+        <div class="cr-step-fields">
+          <input class="cr-input" placeholder="Schritt-Titel (z.B. Teig kneten)" maxlength="80" value="${esc(step.title || '')}" oninput="updateCustomStep(${i}, 'title', this.value)">
+          <textarea class="cr-input" rows="2" placeholder="Anleitung für diesen Schritt…" maxlength="800" oninput="updateCustomStep(${i}, 'content', this.value)">${esc(step.content || '')}</textarea>
+          <div class="cr-step-timer-row">
+            <label>⏱ Timer (Min):</label>
+            <input class="cr-input cr-step-timer-input" type="number" inputmode="numeric" min="0" max="1440" value="${timerMin}" oninput="updateCustomStep(${i}, 'timerMin', this.value)">
+            <span style="font-size:11px;color:var(--muted);">leer = kein Timer</span>
+          </div>
+        </div>
+        <button class="cr-row-remove" onclick="removeCustomStep(${i})" aria-label="Schritt entfernen">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function getCustomRecipes() {
+  try {
+    const raw = localStorage.getItem('brot-custom-recipes');
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
 function saveCustomRecipe() {
   const name = document.getElementById('cr-name').value.trim();
   if (!name) { showToast('Bitte Rezeptname eingeben'); return; }
+  const validIngs = crIngredients.filter(i => i.name && i.name.trim());
+  if (validIngs.length === 0) { showToast('Mindestens eine Zutat eingeben'); return; }
+  const validSteps = crSteps.filter(s => s.title && s.title.trim());
+  if (validSteps.length === 0) { showToast('Mindestens einen Schritt eingeben'); return; }
+
   const tag = document.getElementById('cr-tag').value.trim() || 'Eigenes Rezept';
+  const emojiEl = document.getElementById('cr-emoji');
+  const emoji = (emojiEl && emojiEl.value.trim()) || '📝';
   const totalTime = document.getElementById('cr-time').value.trim() || '—';
-  const ingredientLines = document.getElementById('cr-ingredients').value.trim().split('\n').filter(Boolean);
-  const stepLines = document.getElementById('cr-steps').value.trim().split('\n').filter(Boolean);
-
-  const ingredients = ingredientLines.map(line => {
-    const parts = line.trim().split(/\s+/);
-    const amount = parseFloat(parts[0]) || 0;
-    const unit = parts[1] || '';
-    const ingName = parts.slice(2).join(' ') || line;
-    return { name: ingName, amount, unit };
-  });
-
-  const steps = stepLines.map(line => {
-    const parts = line.split('|');
-    const title = (parts[0] || '').trim();
-    const content = (parts[1] || '').trim();
-    const timerMin = parseInt(parts[2]) || 0;
-    return { title, content, timer: timerMin > 0 ? timerMin * 60 : null, ingredientIdxs: [] };
-  });
-
-  if (steps.length === 0) { showToast('Bitte mindestens einen Schritt eingeben'); return; }
 
   const id = 'custom-' + Date.now();
-  const newRecipe = {
-    id, name, tag, emoji: '📝',
-    totalTime, activeTime: '—',
-    ingredients, steps
+  const recipe = {
+    id, name, tag, emoji, totalTime, activeTime: '—',
+    ingredients: validIngs.map(i => ({
+      name: String(i.name).trim().slice(0, 60),
+      amount: Number(i.amount) || 0,
+      unit: String(i.unit || '').trim().slice(0, 10) || 'Stk',
+    })),
+    steps: validSteps.map(s => ({
+      title: String(s.title).trim().slice(0, 80),
+      content: String(s.content || '').trim().slice(0, 800),
+      timer: s.timer || null,
+      ingredientIdxs: [],
+    })),
+    custom: true,
   };
 
-  RECIPES.push(newRecipe);
-  RECIPE_TAGS[id] = [];
-  // Persist custom recipes
-  try {
-    const saved = JSON.parse(localStorage.getItem('brot-custom-recipes') || '[]');
-    saved.push(newRecipe);
-    localStorage.setItem('brot-custom-recipes', JSON.stringify(saved));
-  } catch(e) {}
+  const customs = getCustomRecipes();
+  customs.push(recipe);
+  if (!safeSetItem('brot-custom-recipes', JSON.stringify(customs))) return;
+
+  // In RECIPES Array einfügen damit es sofort verfügbar ist
+  if (typeof RECIPES !== 'undefined' && Array.isArray(RECIPES)) {
+    RECIPES.push(recipe);
+    if (typeof RECIPE_TAGS !== 'undefined') RECIPE_TAGS[id] = ['custom'];
+    if (typeof RECIPE_ALLERGENS !== 'undefined') RECIPE_ALLERGENS[id] = [];
+    if (typeof RECIPE_VEGAN !== 'undefined') RECIPE_VEGAN[id] = false;
+  }
 
   closeCustomRecipe();
-  renderHome();
-  showToast(`„${name}" gespeichert ✓`);
+  if (typeof renderHome === 'function') renderHome();
+  showToast('✓ Rezept gespeichert');
 }
 
 function loadCustomRecipes() {
   try {
     const saved = JSON.parse(localStorage.getItem('brot-custom-recipes') || '[]');
     saved.forEach(r => {
-      if (!RECIPES.find(x => x.id === r.id)) {
+      if (r && r.id && !RECIPES.find(x => x.id === r.id)) {
         RECIPES.push(r);
-        RECIPE_TAGS[r.id] = [];
+        if (typeof RECIPE_TAGS !== 'undefined') RECIPE_TAGS[r.id] = RECIPE_TAGS[r.id] || ['custom'];
+        if (typeof RECIPE_ALLERGENS !== 'undefined') RECIPE_ALLERGENS[r.id] = RECIPE_ALLERGENS[r.id] || [];
+        if (typeof RECIPE_VEGAN !== 'undefined') RECIPE_VEGAN[r.id] = RECIPE_VEGAN[r.id] || false;
       }
     });
   } catch(e) {}
@@ -7562,13 +7807,21 @@ function closeShare() {
   document.getElementById('shareOverlay').classList.remove('active');
 }
 
+// P3.3: Deep-Link für aktuelles Rezept generieren
+function getRecipeDeepLink() {
+  if (!currentRecipe) return location.origin + location.pathname;
+  return location.origin + location.pathname + '?recipe=' + encodeURIComponent(currentRecipe.id);
+}
+
 function shareNative() {
   if (!currentRecipe) return;
+  const url = getRecipeDeepLink();
   const text = `🍞 ${currentRecipe.name}\n\nZutaten (${scale} Brot${scale > 1 ? 'e' : ''}):\n` +
     currentRecipe.ingredients.map(ing => { const f = formatUnit(ing.amount * scale, ing.unit); return `• ${f.val} ${f.unit} ${ing.name}`; }).join('\n') +
+    '\n\n👉 Direkt öffnen: ' + url +
     '\n\nMit Brot & Zeit gebacken 🌾';
   if (navigator.share) {
-    navigator.share({ title: currentRecipe.name, text }).catch(() => {});
+    navigator.share({ title: currentRecipe.name, text, url }).catch(() => {});
   } else {
     copyToClipboard(text);
   }
@@ -7577,11 +7830,37 @@ function shareNative() {
 
 function copyShareLink() {
   if (!currentRecipe) return;
+  const url = getRecipeDeepLink();
   const text = `🍞 ${currentRecipe.name}\n\nZutaten (${scale} Brot${scale > 1 ? 'e' : ''}):\n` +
     currentRecipe.ingredients.map(ing => { const f = formatUnit(ing.amount * scale, ing.unit); return `• ${f.val} ${f.unit} ${ing.name}`; }).join('\n') +
+    '\n\n👉 Direkt öffnen: ' + url +
     '\n\nMit Brot & Zeit gebacken 🌾';
   copyToClipboard(text);
   closeShare();
+}
+
+// P3.3: Nur den Link kopieren (kürzer)
+function copyShareUrlOnly() {
+  if (!currentRecipe) return;
+  copyToClipboard(getRecipeDeepLink());
+  closeShare();
+}
+
+// P3.3: Beim Laden Deep-Link auswerten
+function handleDeepLink() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const recipeId = params.get('recipe');
+    if (recipeId && typeof RECIPES !== 'undefined') {
+      const r = RECIPES.find(x => x.id === recipeId);
+      if (r) {
+        // Kurz warten bis Render fertig ist
+        setTimeout(() => {
+          if (typeof openRecipe === 'function') openRecipe(recipeId);
+        }, 200);
+      }
+    }
+  } catch(e) {}
 }
 
 function copyToClipboard(text) {
@@ -7765,6 +8044,11 @@ function handlePhotoUpload(event) {
     event.target.value = '';
     return;
   }
+  // P3.4: Processing-Feedback für große Dateien
+  const preview0 = document.getElementById('photoPreview');
+  if (file.size > 1024 * 1024) {
+    preview0.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);">📸 Komprimiere Foto…</div>';
+  }
   const reader = new FileReader();
   reader.onload = (e) => {
     // Resize to max 800px to avoid localStorage overflow
@@ -7778,6 +8062,10 @@ function handlePhotoUpload(event) {
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       const compressed = canvas.toDataURL('image/jpeg', 0.6);
+      // P3.4: Größenreduktion anzeigen
+      const origKB = Math.round(file.size / 1024);
+      const newKB = Math.round(compressed.length * 0.75 / 1024);
+      const ratio = Math.round((1 - newKB / origKB) * 100);
       const preview = document.getElementById('photoPreview');
       // SEC-01b FIX: Use DOM API instead of innerHTML to set img src.
       preview.innerHTML = '';
@@ -7788,7 +8076,10 @@ function handlePhotoUpload(event) {
       previewImg.style.cssText = 'max-width:100%;max-height:260px;border-radius:16px;object-fit:cover;box-shadow:0 4px 20px rgba(0,0,0,0.15)';
       const caption = document.createElement('div');
       caption.style.cssText = 'font-size:11px;color:var(--muted);margin-top:6px;';
-      caption.textContent = 'Foto gespeichert';
+      // P3.4: Anzeige der Kompressionsrate
+      caption.textContent = origKB > newKB
+        ? `Foto gespeichert · ${origKB} KB → ${newKB} KB (-${ratio}%)`
+        : 'Foto gespeichert';
       wrap.appendChild(previewImg);
       wrap.appendChild(caption);
       preview.appendChild(wrap);
@@ -9261,6 +9552,8 @@ renderKaffeeHome();
 renderJournal();
 initSuiteNav();
 checkFirstLaunch();
+// P3.3: Deep-Link auswerten (?recipe=xxx)
+handleDeepLink();
 </script>
 </body>
 </html>
